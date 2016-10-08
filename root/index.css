@@ -1,0 +1,38 @@
+
+body {
+  font-family: Verdana, sans-serif;
+  color: #34657d;
+}
+
+
+#sidebar {
+    width: 200px;
+    height: 900px;
+    background-color: lightblue;
+    float: left;
+
+    margin-right: 5px;
+    padding: 5px;
+}
+
+
+#learnmore {
+    height:60px;
+    width: 120px;
+    border-color:#6495ed;
+    background-color:#bcd2EE;
+    border-style:solid;
+    border-width:2px;
+    border-radius:12px;
+    margin:auto;
+    text-align: center;
+}
+
+a {
+    text-decoration:none;
+}
+
+span {
+    font-weight: Bold;
+    color: White;
+}

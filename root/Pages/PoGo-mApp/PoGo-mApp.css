@@ -1,0 +1,28 @@
+
+#mapSelect {
+  margin: auto;
+  margin-bottom: 5px;
+  display: block;
+}
+
+button {
+  margin: auto;
+  margin-bottom: 5px;
+  display: block;
+
+}
+
+#selectedPointData {
+  margin: auto;
+  margin-bottom: 5px;
+  display: block;
+  text-align: center;
+  font-family: Arial;
+}
+
+#map {
+  margin: auto;
+  display: block;
+  background-color: #dddddd;
+
+}
