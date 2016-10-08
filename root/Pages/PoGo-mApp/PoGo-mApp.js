@@ -16,7 +16,7 @@ var undoPoint = null;
 
 //vars for map select
 //const APP_DIRECTORY = "PoGo mApp";
-const MAP_DIRECTORY = "http://localhost/pogomapp-data/Maps";
+const MAP_DIRECTORY = "http://zacharyswalberg.com/pogomapp-data/Maps";
 var mapSelect = document.getElementById("mapSelect");
 var mapName = mapSelect.value;
 var mapImage = new Image();
