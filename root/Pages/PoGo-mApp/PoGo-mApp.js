@@ -73,15 +73,17 @@ function mapSelectListener(e) {
 
   //need to change the map name, image, point array, select point and undo point
     //shouldn't have to save anything because each change request updates server
+    //BUT we do have to re-draw the map
 
   //update map vars
   mapName = mapSelect.value;
   loadMapImage();
 
   //update pointArray, selectedpoint
-  loadXMLDoc();
+  getPointsFromServer();
   undoPoint = null;
 
+  draw();
 }
 
 
@@ -94,7 +96,9 @@ deleteAllButton.addEventListener("click", deleteAllButtonListener);
 function deleteAllButtonListener(e) {
   if (confirm("Are you sure you want to delete?")){
     pointArray = [];
-    postXML();
+    unselectPoint();
+    postPointsToServer();
+    //postXML();
     //redraw  based on new status
     draw();
   }
@@ -107,20 +111,22 @@ function editSpawnTimeButtonListener(e) {
 
   if (selectedPoint !== null){
     //prompt for new time and update selectec
-    var newSpawnTime = promptSpawnTime();
+    var newSpawnTime = parseInt(promptSpawnTime());
     setSelectedPointSpawnTime(newSpawnTime);
 
-    //update other places: XML, re-draw map, selected point data
-    postXML();
+    //update other places: server, re-draw map, refresh selected point text
+    postPointsToServer();
+    //postXML();
     //redraw  based on new status
     draw();
-    selectPoint(selectedPoint);
+    //selectPoint(selectedPoint);
+    refreshSelectedPointText();
   }
 }
 
-deleteSpawnPointButton.addEventListener("click", deleteSpawnTimeButtonListener);
+deleteSpawnPointButton.addEventListener("click", deleteSpawnPointButtonListener);
 
-function deleteSpawnTimeButtonListener(e) {
+function deleteSpawnPointButtonListener(e) {
 
   if (confirm("Are you sure you want to delete the selected point?")){
     //first, store deleted button before deletion in case we need to undo
@@ -130,8 +136,9 @@ function deleteSpawnTimeButtonListener(e) {
     removeFromArray(selectedPoint);
     unselectPoint();
 
-    //update XML on server
-    postXML();
+    //update points on server
+    postPointsToServer();
+    //postXML();
   }
 }
 
@@ -142,11 +149,12 @@ function deleteSpawnTimeButtonListener(e) {
 //          ON-LOAD 'N' SHIT
 /////////////////////////////////////////
 window.onload = function(e){
-  loadXMLDoc();
+  getPointsFromServer();
+  //loadXMLDoc();
   loadMapImage();
 
   //canvas.style.background = "url('" + getMapImageURL() + "')";
-  // no longer using background for map image
+  // ^^^no longer using background for map image
 };
 
 
@@ -155,81 +163,40 @@ window.onload = function(e){
 
 
 
-///////////////////////////////////////////////////////
-//    FUNCTIONS FOR XML (REQUESTING AND READING)
-///////////////////////////////////////////////////////
 
-//Uses global var mapName to request the xml file containing point data for that map
-//calls: loadPointsFromXML()
-function loadXMLDoc() {
+//////////////////////////////////////////////////////
+//            POINTS SERVER REQUESTS
+//////////////////////////////////////////////////////
+
+//requests the point array from the server in the form of a json object response
+function getPointsFromServer() {
   var xmlhttp = new XMLHttpRequest();
-  xmlhttp.open("GET", getMapXMLURL(), true);
+  xmlhttp.open("GET", "/points/" + mapName, true);
   xmlhttp.onreadystatechange = function() {
     if (this.readyState == 4 && this.status == 200){
-      loadPointsFromXML(this);
+      //load points from json response
+      pointArray = JSON.parse(this.response);
+      //update the selected point
+      if (pointArray.length > 0){
+        selectPoint(pointArray[pointArray.length-1]);
+      } else {
+        unselectPoint();
+      }
     }
   };
   xmlhttp.send();
 }
 
-//parses XML response, overwrites PointArray with XML data, and selects last point in array when done
-function loadPointsFromXML(xml) {
-  var xmlDoc = xml.responseXML;
-  var xmlPoints = xmlDoc.getElementsByTagName("POINT");
-
-  //make pointArray empty
-  pointArray = [];
-
-  //translate xml response to local data type, pointArray
-  for (i = 0; i < xmlPoints.length; i++){
-    var pointX          = xmlPoints[i].getElementsByTagName("X")[0].childNodes[0].nodeValue;
-    var pointY          = xmlPoints[i].getElementsByTagName("Y")[0].childNodes[0].nodeValue;
-    var pointSpawnTime  = xmlPoints[i].getElementsByTagName("SPAWNTIME")[0].childNodes[0].nodeValue;
-    pointArray[i] = {x: pointX, y: pointY, spawnTime: pointSpawnTime};
-  }
-
-  //after storing points in array, select last point in array
-  if (pointArray.length > 0){
-    selectPoint(pointArray[pointArray.length-1]);
-  }
-}
 
 
-
-
-
-
-////////////////////////////////////////////////////
-//        XML (WRITING AND SUBMITTING)
-////////////////////////////////////////////////////
-
-//creating XML String
-function generatePointsXML(){
-  var XMLString = "";
-  XMLString += '<LISTOFPOINTS>\n';
-  for (i = 0; i < pointArray.length; i++){
-    XMLString += '\t<POINT>\n';
-    XMLString += '\t\t<X>' + pointArray[i].x + '</X>\n';
-    XMLString += '\t\t<Y>' + pointArray[i].y + '</Y>\n';
-    XMLString += '\t\t<SPAWNTIME>' + pointArray[i].spawnTime + '</SPAWNTIME>\n';
-    XMLString += '\t</POINT>\n';
-  }
-  XMLString += '</LISTOFPOINTS>\n';
-
-  //console.log(XMLString);
-  return XMLString;
-}
-
-function postXML(){
+//send the point array back to the server to update the database
+function postPointsToServer(){
   var xmlhttp = new XMLHttpRequest();
-  xmlhttp.open("POST", "/XML/"+mapName, true);
-  xmlhttp.send(generatePointsXML());
-  xmlhttp.onreadystatechange = function() {
-    if (this.readyState == 4 && this.status == 200){
-      console.log(xmlhttp.responseText);
-    }
-  };
+  xmlhttp.open("POST", "/points/" + mapName, true);
+  xmlhttp.setRequestHeader("Content-Type", "application/json");
+  xmlhttp.send(JSON.stringify(pointArray));
 }
+
 
 
 
@@ -261,14 +228,14 @@ function loadMapImage() {
 
 ////////////   DELETING POINTS   ////////////
 
-//function deleteds parameter point from pointArray
+//function deletes parameter point from pointArray
 function removeFromArray(point) {
   var pointIndex = pointArray.indexOf(point);
   if (pointIndex>=0){
     pointArray.splice(pointIndex, 1);
   }
   else {
-    alert("You done f***ed up, A-A-ron.");
+    alert("You done f***ed up, A-A-ron. (What you tryna delete ain't here)");
   }
 }
 
@@ -280,11 +247,14 @@ function removeFromArray(point) {
 
 //basic click and add function
 function addSpawnPoint(pointX, pointY){
-  //prompt for Time, allowing null response to cancel point add
+  //prompt for Time, checks for valid input, returns null if invalid
   var submittedTime = promptSpawnTime();
 
   //is time is valid, add point
   if (submittedTime !== null){
+    //now that we know the submitted time is valid, cast to integer
+    submittedTime = parseInt(submittedTime);
+
     //draw spawn at the location
     var point = {x: pointX, y: pointY, spawnTime:submittedTime};
     drawSpawn(point);
@@ -294,7 +264,10 @@ function addSpawnPoint(pointX, pointY){
     selectPoint(point);
 
     //update XML on the server
-    postXML();
+    //postXML();
+
+    //update JSON on the server
+    postPointsToServer();
   }
 }
 
@@ -417,6 +390,13 @@ function pointToString(point){
 //        FUNCTIONS FOR SELECTING A POINT
 ////////////////////////////////////////////////////
 
+// function to update the selected point text in html
+// !NOTE: uses the current selectedPoint information, make sure that is updated first
+function refreshSelectedPointText() {
+  var selectedPointDataDisplay = document.getElementById("selectedPointData");
+  var newText = "Selected Point:" + pointToString(selectedPoint);
+  selectedPointDataDisplay.innerHTML = newText;
+}
 
 //sets selected point variable and updates display to this point
 function selectPoint(point) {
@@ -424,12 +404,10 @@ function selectPoint(point) {
   unselectPoint();
 
   setSelectedPoint(point);
-  //redraw  based on new status
+  //redraw based on new selected (highlighted) point
   draw();
   //update HTML for new point data
-  var selectedPointDataDisplay = document.getElementById("selectedPointData");
-  var newText = "Selected Point:" + pointToString(point);
-  selectedPointDataDisplay.innerHTML = newText;
+  refreshSelectedPointText();
 }
 
 //function makes sure current point is null, and no point is highlighted
