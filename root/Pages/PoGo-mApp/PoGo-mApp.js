@@ -509,7 +509,7 @@ function drawSpawnTime (point) {
 //draws just the dot
 function drawPoint(point){
   //draw point in normal point color, red
-  drawCircle(point.x, point., POINT_RADIUS, NORMAL_POINT_COLOR);
+  drawCircle(point.x, point.y, POINT_RADIUS, NORMAL_POINT_COLOR);
 }
 
 function drawCircle(x, y, r, color){
