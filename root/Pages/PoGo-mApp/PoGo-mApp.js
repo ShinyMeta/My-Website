@@ -212,9 +212,6 @@ function getMapImageURL() {
   return MAP_DIRECTORY + "/" + mapName + ".PNG";
 }
 
-function getMapXMLURL() {
-  return MAP_DIRECTORY + "/" + mapName + ".xml";
-}
 
 function loadMapImage() {
   mapImage = new Image();
@@ -479,7 +476,6 @@ function highlightPoint(point){
   //check for null point
   if (point !== null){
     //basically draw the circle for the point, but in green
-    var color = "#00FF00";
     drawCircle(point.x, point.y, POINT_RADIUS, HIGHLIGHTED_POINT_COLOR);
   }
 }
@@ -511,9 +507,9 @@ function drawSpawnTime (point) {
 }
 
 //draws just the dot
-function drawPoint(pointX, pointY){
+function drawPoint(point){
   //draw point in normal point color, red
-  drawCircle(pointX, pointY, POINT_RADIUS, NORMAL_POINT_COLOR);
+  drawCircle(point.x, point., POINT_RADIUS, NORMAL_POINT_COLOR);
 }
 
 function drawCircle(x, y, r, color){
