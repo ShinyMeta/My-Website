@@ -68,7 +68,7 @@ function keyUpHandler(e) {
   if (e.keyCode == 39) {
     rightPressed = false;
   }
-  else if (e.keyCode = 37) {
+  else if (e.keyCode == 37) {
     leftPressed = false;
   }
 }
@@ -83,7 +83,7 @@ function mouseMoveHandler(e){
       paddleX = canvas.width - paddleWidth;
     }
     else {
-      paddleX = relativeX - paddleWidth/2
+      paddleX = relativeX - paddleWidth/2;
     }
   }
 }
@@ -228,7 +228,7 @@ function draw() {
   ballX += balldx;
   ballY += balldy;
 
-  collisionDetection()
+  collisionDetection();
 
   drawScore();
   drawLives();

@@ -9,8 +9,45 @@
 <body>
 
   <h1> Chest of Loyalty Calculator </h1>
+  <h3> Check all boxes for materials that you need for crafting: </h3>
+  <div id = "checkBoxes">
+    <input type = "checkbox" value = "Ascended" onClick="toggleAllCheckbox(this)"> <b>Ascended Crafting</b> <br>
+    <input type = "checkbox" name = "Ascended" value = "Deldrimor Steel Ingot"> Deldrimor Steel Ingot <br>
+    <input type = "checkbox" name = "Ascended" value = "Spiritwood Plank"> Spiritwood Plank <br>
+    <input type = "checkbox" name = "Ascended" value = "Bolt of Damask"> Bolt of Damask <br>
+    <input type = "checkbox" name = "Ascended" value = "Elonian Leather Square"> Elonian Leather Square <br>
+    <input type = "checkbox" name = "Ascended" value = "Vision Crystal"> Vision Crystal <br>
+      <br>
+    <input type = "checkbox" value = "Legendary" onClick="toggleAllCheckbox(this)"> <b>Legendary Crafting</b> <br>
+    <input type = "checkbox" name = "Legendary" value = "Mystic Clover"> Mystic Clover <br>
+      <br>
+    <input type = "checkbox" value = "T6 Fine Crafting Mats" onClick="toggleAllCheckbox(this)"> <b>T6 Fine Crafting Mats</b> <br>
+    <input type = "checkbox" name = "T6 Fine Crafting Mats" value = "Pile of Crystalline Dust"> Pile of Crystalline Dust <br>
+    <input type = "checkbox" name = "T6 Fine Crafting Mats" value = "Vial of Powerful Blood"> Vial of Powerful Blood <br>
+    <input type = "checkbox" name = "T6 Fine Crafting Mats" value = "Powerful Venom Sac"> Powerful Venom Sac <br>
+    <input type = "checkbox" name = "T6 Fine Crafting Mats" value = "Ancient Bone"> Ancient Bone <br>
+    <input type = "checkbox" name = "T6 Fine Crafting Mats" value = "Vicious Claw"> Vicious Claw <br>
+    <input type = "checkbox" name = "T6 Fine Crafting Mats" value = "Vicious Fang"> Vicious Fang <br>
+    <input type = "checkbox" name = "T6 Fine Crafting Mats" value = "Armored Scale"> Armored Scale <br>
+    <input type = "checkbox" name = "T6 Fine Crafting Mats" value = "Elaborate Totem"> Elaborate Totem <br>
+      <br>
+    <input type = "checkbox" value = "T4 Fine Crafting Mats" onClick="toggleAllCheckbox(this)"> <b>T4 Fine Crafting Mats</b> <br>
+    <input type = "checkbox" name = "T4 Fine Crafting Mats" value = "Pile of Luminous Dust"> Pile of Luminous Dust <br>
+    <input type = "checkbox" name = "T4 Fine Crafting Mats" value = "Vial of Thick Blood"> Vial of Thick Blood <br>
+    <input type = "checkbox" name = "T4 Fine Crafting Mats" value = "Full Venom Sac"> Full Venom Sac <br>
+    <input type = "checkbox" name = "T4 Fine Crafting Mats" value = "Heavy Bone"> Heavy Bone <br>
+    <input type = "checkbox" name = "T4 Fine Crafting Mats" value = "Sharp Claw"> Sharp Claw <br>
+    <input type = "checkbox" name = "T4 Fine Crafting Mats" value = "Sharp Fang"> Sharp Fang <br>
+    <input type = "checkbox" name = "T4 Fine Crafting Mats" value = "Smooth Scale"> Smooth Scale <br>
+    <input type = "checkbox" name = "T4 Fine Crafting Mats" value = "Engraved Totem"> Engraved Totem <br>
 
-  <p id = "Text"> This is the default text </p> 
+
+
+  </div>
+
+  <p id = "Text"> This is the default text </p>
+
+  <button type = "button" id = "recalculateButton">Recalculate Values</button>
 
   <script src = "LoyaltyCalc.js"> </script>
 
