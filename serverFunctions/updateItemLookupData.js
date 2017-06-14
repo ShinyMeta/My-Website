@@ -22,7 +22,7 @@ var items = [];
 var mysqlConnection = mysql.createConnection({
   host: 'localhost',
   user: 'root',
-  password: 'sswwaa11Y',
+  password: 'mywebserver',
   database: 'goldfarmingdatabase'
 });
 
