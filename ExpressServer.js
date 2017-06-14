@@ -11,6 +11,25 @@ var fs = require('fs');
 var app = express();
 
 
+///////////////////////////////////////////////
+//  PLACE TO RUN SCRIPT ON SERVER START
+///////////////////////////////////////////////
+
+var updateItemLookupData = require('./serverFunctions/updateItemLookupData.js');
+updateItemLookupData();
+
+//////////////////////////////////////////////
+//////////////////////////////////////////////
+//////////////////////////////////////////////
+
+
+
+
+
+
+
+
+
 
 //http requests with content type application/json will be parsed
 //req.body will be changed to a json object
@@ -23,6 +42,9 @@ app.use(express.static('root'));
 var points = require("./routes/points");
 app.use("/points", points);
 
+//router for goldFarm
+var goldFarm = require('./routes/goldFarm');
+app.use('/goldFarm', goldFarm);
 
 
 
