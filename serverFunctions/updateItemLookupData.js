@@ -81,6 +81,11 @@ function getHttpsRequest(hostname, path, responseFunction){
 
   var req = https.request(options, responseFunction).on('error', function(e) {
     console.log('problem with request to ' + path + ': ' + e.message);
+    if (e.code == "ECONNRESET"){
+      console.log("requeueing request");
+      queueRequest('https:', hostname, path, responseFunction);
+      afterRequestComplete();
+    }
   });
 
   req.end();
