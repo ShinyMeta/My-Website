@@ -131,7 +131,9 @@ function executeNextRequest(){
 //SHOULD ONLY BE CALLED AFTER THE NEXT REQUEST IS DONE
 function afterRequestComplete(){
   currentExecutingRequests--;
+
   //console.log('Request Complete. Currently active Requests: ' + currentExecutingRequests);
+
 
   //if there's anything waiting, get it started
   if (requestQueue.length !== 0) {
