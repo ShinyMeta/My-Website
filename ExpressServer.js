@@ -15,8 +15,18 @@ var app = express();
 //  PLACE TO RUN SCRIPT ON SERVER START
 ///////////////////////////////////////////////
 
+var API_KEY = 'access_token=58468D10-F7BA-234C-963E-A854D0001EC150A288B8-F8F2-4611-A664-C526CE446B20';
+
+var characterRequestURL = 'api.guildwars2.com/v2/characters?page=0&access_token=58468D10-F7BA-234C-963E-A854D0001EC150A288B8-F8F2-4611-A664-C526CE446B20';
+var walletRequestURL = 'api.guildwars2.com/v2/account/wallet?access_token=58468D10-F7BA-234C-963E-A854D0001EC150A288B8-F8F2-4611-A664-C526CE446B20';
+var bankRequestURL = 'api.guildwars2.com/v2/account/bank?access_token=58468D10-F7BA-234C-963E-A854D0001EC150A288B8-F8F2-4611-A664-C526CE446B20';
+var matStorageRequestURL = 'api.guildwars2.com/v2/account/materials?access_token=58468D10-F7BA-234C-963E-A854D0001EC150A288B8-F8F2-4611-A664-C526CE446B20';
+
 // var updateItemLookupData = require('./serverFunctions/updateItemLookupData.js');
 // updateItemLookupData();
+
+var updateCurrencyLookupData = require('./serverFunctions/updateCurrencyLookupData.js');
+updateCurrencyLookupData();
 
 //////////////////////////////////////////////
 //////////////////////////////////////////////
