@@ -15,8 +15,8 @@ var app = express();
 //  PLACE TO RUN SCRIPT ON SERVER START
 ///////////////////////////////////////////////
 
-var updateItemLookupData = require('./serverFunctions/updateItemLookupData.js');
-updateItemLookupData();
+// var updateItemLookupData = require('./serverFunctions/updateItemLookupData.js');
+// updateItemLookupData();
 
 //////////////////////////////////////////////
 //////////////////////////////////////////////

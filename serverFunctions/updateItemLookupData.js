@@ -62,6 +62,11 @@ function getHttpRequest(hostname, path, responseFunction){
 
   var req = http.request(options, responseFunction).on('error', function(e) {
     console.log('problem: ' + e.message);
+    if (e.code == "ECONNRESET"){
+      //console.log("requeueing request");
+      queueRequest('http', hostname, path, responseFunction);
+      afterRequestComplete();
+    }
   });
 
   req.end();
@@ -82,7 +87,7 @@ function getHttpsRequest(hostname, path, responseFunction){
   var req = https.request(options, responseFunction).on('error', function(e) {
     console.log('problem with request to ' + path + ': ' + e.message);
     if (e.code == "ECONNRESET"){
-      console.log("requeueing request");
+      //console.log("requeueing request");
       queueRequest('https', hostname, path, responseFunction);
       afterRequestComplete();
     }
@@ -117,7 +122,7 @@ function executeNextRequest(){
   //console.log('executing next request: ' + requestQueue[0].path);
 
   currentExecutingRequests++;
-  console.log('Beginning new request. Currently active Requests: ' + currentExecutingRequests);
+  //console.log('Beginning new Request. Currently active Requests: ' + currentExecutingRequests);
   getRequest(requestQueue.shift());
 }
 
@@ -126,7 +131,9 @@ function executeNextRequest(){
 //SHOULD ONLY BE CALLED AFTER THE NEXT REQUEST IS DONE
 function afterRequestComplete(){
   currentExecutingRequests--;
-  console.log('Request complete. Currently active Requests: ' + currentExecutingRequests);
+
+  //console.log('Request Complete. Currently active Requests: ' + currentExecutingRequests);
+
 
   //if there's anything waiting, get it started
   if (requestQueue.length !== 0) {
@@ -156,7 +163,7 @@ function parseItemIds(response){
   // response.setEncoding('utf8');
   var dataString = '';
   response.on('data', function(data) {
-    console.log('blah');
+    //console.log('blah');
     dataString += data;
   }).on('error', function(error) {
                      console.error('Error ' + error);
@@ -185,7 +192,7 @@ function requestDetailsForItemIds(itemIds){
     //                      console.log(IDParameters);
   }
 
-            console.log(itemIds.length);
+            //console.log(itemIds.length);
 }
 
 //response function for storing the items into an array
