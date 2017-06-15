@@ -83,7 +83,7 @@ function getHttpsRequest(hostname, path, responseFunction){
     console.log('problem with request to ' + path + ': ' + e.message);
     if (e.code == "ECONNRESET"){
       console.log("requeueing request");
-      queueRequest('https:', hostname, path, responseFunction);
+      queueRequest('https', hostname, path, responseFunction);
       afterRequestComplete();
     }
   });
@@ -117,7 +117,7 @@ function executeNextRequest(){
   //console.log('executing next request: ' + requestQueue[0].path);
 
   currentExecutingRequests++;
-  console.log('Beginning new Request. Currently active Requests: ' + currentExecutingRequests);
+  console.log('Beginning new request. Currently active Requests: ' + currentExecutingRequests);
   getRequest(requestQueue.shift());
 }
 
@@ -126,7 +126,7 @@ function executeNextRequest(){
 //SHOULD ONLY BE CALLED AFTER THE NEXT REQUEST IS DONE
 function afterRequestComplete(){
   currentExecutingRequests--;
-  console.log('Request Complete. Currently active Requests: ' + currentExecutingRequests);
+  console.log('Request complete. Currently active Requests: ' + currentExecutingRequests);
 
   //if there's anything waiting, get it started
   if (requestQueue.length !== 0) {
