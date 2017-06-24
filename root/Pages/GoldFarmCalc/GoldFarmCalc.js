@@ -17,8 +17,7 @@ var editButton = document.getElementById('editButton');
 ///////////////////////////////////////////
 
 //get all the methods for the current user and update the selector
-var URL = '/goldFarm/methods/' + username;
-getHttpRequest(URL, receiveMethods);
+getHttpRequest('/goldFarm/methods/' + username, receiveMethods);
 
 
 
@@ -59,29 +58,58 @@ startButton.addEventListener('click', startButtonListener);
 function startButtonListener(e) {
 
   //first check method selector
-  if (methodSelect.value == 'default'){
-    //if default, then do nothing
-  } else if (methodSelect.value == 'add'){
-    //if add new, then prompt for name and send server requeest to make new farm
-    var name = prompt ("What is the name of this method?");
-    var method = {name: name, username: username};
+  if (methodSelect.value != 'default') {
 
-    postHttpRequest('/goldFarm/newmethod', method, function(response){
-      var wasAdded = JSON.parse(response);
-      if (wasAdded){
-        addMethodToSelect(name, methodSelect.length-1);
-      }
-      else {
-        alert ('There was an error adding the method to the server.  Please try again.');
-      }
-    });
-  } else {
     //otherwise, send start run request and begin timer and stuff
+    var startRunURL ="/goldFarm/startRun?username=" + username + "&methodName=" + methodSelect.value;
 
+    getHttpRequest(startRunURL, function(response){});
   }
-
 }
 
+
+
+endButton.addEventListener('click', endButtonListener);
+
+function endButtonListener(e) {
+
+  //first check method selector
+  if (methodSelect.value == 'default' || methodSelect.value == 'add'){
+    //if default or add, do nothing
+
+  } else {
+
+    //otherwise, send start run request and begin timer and stuff
+    var endRunURL ="/goldFarm/endRun?username=" + username;
+
+    getHttpRequest(endRunURL, function(response){});
+  }
+}
+
+
+
+addButton.addEventListener('click', addButtonListener);
+
+function addButtonListener(e) {
+  //if add new, then prompt for name and send server requeest to make new farm
+  var name = prompt ("What is the name of this method?");
+  if (name === null || name === ''){
+    alert ('You gotta put something there, silly. Try again');
+    return;
+  }
+
+  var method = {name: name, username: username};
+
+  postHttpRequest('/goldFarm/newmethod', method, function(response){
+    var wasAdded = JSON.parse(response);
+    if (wasAdded){
+      addMethodToSelect(name, methodSelect.length-1);
+    }
+    else {
+      alert ('There was an error adding the method to the server.  Please try again.');
+    }
+  });
+}
 
 
 
@@ -117,6 +145,11 @@ function editButtonListener(e){
   else {
     var newName = prompt("What would you like the new name for '" +
       methodSelect.value + '" to be?:');
+
+    if (newName === null || newName === ''){
+      alert ('You gotta put something there, silly. Try again');
+      return;
+    }
 
     //make an edit request to rename the method
     if (newName != methodSelect.value){

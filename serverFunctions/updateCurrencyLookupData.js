@@ -94,6 +94,24 @@ function getHttpsRequest(hostname, path, responseFunction){
   req.end();
 }
 
+//generic parse data
+function parseResponse(response, onData, onError, onEnd){
+  //start a string to hold the data
+  var dataString = '';
+  response.on('data', function(data) {
+    //when I receive a chunk of data in a response
+    onData(data);
+    dataString += data;
+  }).on('error', function(error) {
+    //in case of an error
+    onError(error);
+    console.error('Error ' + error);
+  }).on('end', function(){
+    //done receiving data and stuff
+    onEnd(dataString);
+  });
+}
+
 
 
 
@@ -159,17 +177,16 @@ function updateCurrencyLookupData(){
 function storeCurrencyData(response) {
   //                    console.log('beginning to parse JSON');
 
-  var dataString = '';
-  response.on('data', function(data) {
-    //when I receive a chunk of data in a response
-    //console.log('blep');
-    dataString += data;
-  }).on('error', function(error) {
-    console.error('Error ' + error);
-  }).on('end', function(){
+
+  parseResponse(response,
+    function(data){
+
+  }, function(error){
+
+  }, function(endData){
     afterRequestComplete();
     //done receiving data and stuff
-    currencies = JSON.parse(dataString);
+    currencies = JSON.parse(endData);
     for (var i = 0; i < currencies.length; i++){
       var query = mysqlConnection.query('INSERT into currencylookup set ?', trimCurrencyForLookupTable(currencies[i]), logSQLError);
     }
