@@ -199,6 +199,7 @@ function saveStateTable(user, tableName){
       getWalletFromAPI(user, tableName).then((wallet) => {
         //  THEN query insert for every currency
         saveStateWallet(wallet, user, tableName + 'wallet').then((values) => {
+        console.log('wallet done')
           resolve(values);
         })
       })
@@ -211,6 +212,7 @@ function saveStateTable(user, tableName){
       getItemsFromAPI(user).then((items) => {
         //  THEN query insert for every item
         saveStateItems(user, items, tableName + 'items').then((values) => {
+        console.log('items done')
           resolve(values)
         })
       })
@@ -231,6 +233,7 @@ function getWalletFromAPI(user){
     getHttpsRequest(hostname, path).then((response) => {
       parseResponse(response).then ((endData) => {
         let wallet = JSON.parse(endData);
+        console.log('wallet done')
         resolve(wallet);
       })
       .catch((err) => {
