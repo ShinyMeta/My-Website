@@ -290,6 +290,7 @@ function getMatsFromAPI(user){
         //store all mats into table
         let mats = JSON.parse(endData)
         resolve(mats);
+        console.log('mats done')
       })
       .catch((err) => {
         console.error(err);
@@ -311,6 +312,7 @@ function getBankFromAPI(user){
         //store all bank items into table
         let bankItems = JSON.parse(endData);
         resolve(bankItems);
+        console.log('bank done')
       })
       .catch((err) => {
         console.error(err);
@@ -349,6 +351,7 @@ function getInventoriesFromAPI(user){
             }
           }
         }
+        console.log('inventory done')
         resolve(inventoryItems);
       })
       .catch((err) => {
