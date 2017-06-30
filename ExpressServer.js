@@ -5,7 +5,7 @@
 
 var express = require('express');
 var bodyParser = require('body-parser');
-var fs = require('fs');
+//var fs = require('fs');
 
 //app is for controlling the server
 var app = express();
@@ -44,8 +44,8 @@ app.use(bodyParser.json());
 app.use(express.static('root'));
 
 //router for /points/ requests
-var points = require("./routes/points");
-app.use("/points", points);
+var points = require('./routes/points');
+app.use('/points', points);
 
 //router for goldFarm
 var goldFarm = require('./routes/goldFarm');

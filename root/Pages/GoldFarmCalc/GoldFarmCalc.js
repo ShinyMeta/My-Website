@@ -4,12 +4,18 @@ var username = 'shinymeta';
 
 
 
-var methodSelect = document.getElementById("methodSelect");
 
-var startButton = document.getElementById('startButton');
-var endButton = document.getElementById('endButton');
-var deleteButton = document.getElementById('deleteButton');
-var editButton = document.getElementById('editButton');
+const startButton = document.getElementById('startButton');
+const endButton = document.getElementById('endButton');
+const addButton = document.getElementById('addButton');
+const deleteButton = document.getElementById('deleteButton');
+const editButton = document.getElementById('editButton');
+
+const methodSelect = document.getElementById('methodSelect');
+
+const timerDisplay = document.getElementById('timerDisplay');
+
+const resultsTable = document.getElementById('resultsTable');
 
 
 ///////////////////////////////////////////
@@ -17,7 +23,7 @@ var editButton = document.getElementById('editButton');
 ///////////////////////////////////////////
 
 //get all the methods for the current user and update the selector
-getHttpRequest('/goldFarm/methods/' + username, receiveMethods);
+getHttpRequest('/goldFarm/methods/' + username).then((result) => { receiveMethods(result) });
 
 
 
@@ -43,7 +49,7 @@ getHttpRequest('/goldFarm/methods/' + username, receiveMethods);
 
 //////////   SELECT LISTENER   ///////////
 
-methodSelect.addEventListener("change", methodSelectListener);
+methodSelect.addEventListener('change', methodSelectListener);
 
 function methodSelectListener(e) {
   //I don't think I need to put anything here? will prompt on start button click
@@ -57,14 +63,12 @@ startButton.addEventListener('click', startButtonListener);
 
 function startButtonListener(e) {
 
-  //first check method selector
-  if (methodSelect.value != 'default') {
+  //send start run request and begin timer and stuff
+  var startRunURL ='/goldFarm/startRun?username=' + username;
 
-    //otherwise, send start run request and begin timer and stuff
-    var startRunURL ="/goldFarm/startRun?username=" + username + "&methodName=" + methodSelect.value;
-
-    getHttpRequest(startRunURL, function(response){});
-  }
+  getHttpRequest(startRunURL).then((response) => {
+    //start timer
+  });
 }
 
 
@@ -72,18 +76,27 @@ function startButtonListener(e) {
 endButton.addEventListener('click', endButtonListener);
 
 function endButtonListener(e) {
+  //otherwise, send start run request and begin timer and stuff
+  var endRunURL ='/goldFarm/endRun?username=' + username;
 
-  //first check method selector
-  if (methodSelect.value == 'default' || methodSelect.value == 'add'){
-    //if default or add, do nothing
+  //response = {
+  //  time(in seconds),
+  //  wallet [
+  //    { name,
+  //    currid,
+  //    qty },
+  //    {... ],
+  //  items [
+  //    { name,
+  //    itemid,
+  //    qty },
+  //    {... ],
+  //}
 
-  } else {
-
-    //otherwise, send start run request and begin timer and stuff
-    var endRunURL ="/goldFarm/endRun?username=" + username;
-
-    getHttpRequest(endRunURL, function(response){});
-  }
+  getHttpRequest(endRunURL).then((response) => {
+    let runResult = JSON.parse(response);
+    displayRunToTable (runResult);
+  });
 }
 
 
@@ -92,23 +105,40 @@ addButton.addEventListener('click', addButtonListener);
 
 function addButtonListener(e) {
   //if add new, then prompt for name and send server requeest to make new farm
-  var name = prompt ("What is the name of this method?");
+  var name = prompt ('What is the name of this method?');
   if (name === null || name === ''){
     alert ('You gotta put something there, silly. Try again');
     return;
   }
 
   var method = {name: name, username: username};
+  addMethodRequest(method);
+}
 
-  postHttpRequest('/goldFarm/newmethod', method, function(response){
-    var wasAdded = JSON.parse(response);
-    if (wasAdded){
-      addMethodToSelect(name, methodSelect.length-1);
+
+
+editButton.addEventListener('click', editButtonListener);
+
+function editButtonListener(e){
+  //if default or add button is selected, alert to select a method
+  if (methodSelect.value == 'default' || methodSelect.value == 'add'){
+    alert('You have not selected a method to edit.  Please select a method first.');
+  }
+  //if a method is selected, prompt for new name.
+  else {
+    var newName = prompt('What would you like the new name for "' +
+      methodSelect.value + '" to be?:');
+
+    if (newName === null || newName === ''){
+      alert ('You gotta put something there, silly. Try again');
+      return;
     }
-    else {
-      alert ('There was an error adding the method to the server.  Please try again.');
+
+    //make an edit request to rename the method
+    if (newName != methodSelect.value){
+      editMethodRequest(newName);
     }
-  });
+  }
 }
 
 
@@ -127,33 +157,7 @@ function deleteButtonListener(e){
       ' from the server?  All data relating to this method will be lost.');
     if (areTheySureTheyWantToDelete){
       //make a delete request
-      makeDeleteRequest();
-    }
-  }
-}
-
-
-
-editButton.addEventListener('click', editButtonListener);
-
-function editButtonListener(e){
-  //if default or add button is selected, alert to select a method
-  if (methodSelect.value == 'default' || methodSelect.value == 'add'){
-    alert('You have not selected a method to edit.  Please select a method first.');
-  }
-  //if a method is selected, prompt for new name.
-  else {
-    var newName = prompt("What would you like the new name for '" +
-      methodSelect.value + '" to be?:');
-
-    if (newName === null || newName === ''){
-      alert ('You gotta put something there, silly. Try again');
-      return;
-    }
-
-    //make an edit request to rename the method
-    if (newName != methodSelect.value){
-      makeEditRequest(newName);
+      deleteMethodRequest();
     }
   }
 }
@@ -163,51 +167,145 @@ function editButtonListener(e){
 
 
 //////////////////////////////////
-//     EVENT HELPER FUNCTIONS
+//     HTTP HELPER FUNCTIONS
 /////////////////////////////////
 
 //Generic "GET" HTTP Request function
-function getHttpRequest(URL, responseFunction){
-  var xmlhttp = new XMLHttpRequest();
-  xmlhttp.open("GET", URL, true);
-  xmlhttp.onreadystatechange = function() {
-    if (this.readyState == 4 && this.status == 200) {
-      //response received, call response function now
-      responseFunction(this.response);
-    }
-  };
-  xmlhttp.send();
+function getHttpRequest(URL){
+  return new Promise((resolve, reject) => {
+    var xmlhttp = new XMLHttpRequest();
+    xmlhttp.open('GET', URL, true);
+    xmlhttp.onreadystatechange = function() {
+      if (this.readyState == 4 && this.status == 200) {
+        //response received, call response function now
+        resolve(this.response);
+      }
+    };
+    xmlhttp.send();
+  });
 }
 
 
 //generic "POST" sending a JSON encoded object
-function postHttpRequest(URL, object, responseFunction){
-  var xmlhttp = new XMLHttpRequest();
-  xmlhttp.open("POST", URL, true);
-  xmlhttp.setRequestHeader("Content-Type", "application/json");
+function postHttpRequest(URL, object){
+  return new Promise((resolve, reject) => {
+    var xmlhttp = new XMLHttpRequest();
+    xmlhttp.open('POST', URL, true);
+    xmlhttp.setRequestHeader('Content-Type', 'application/json');
 
-  xmlhttp.onreadystatechange = function() {
-    if (this.readyState == 4 && this.status == 200) {
-      //response received, call response function now
-      responseFunction(this.response);
-    }
-  };
-  xmlhttp.send(JSON.stringify(object));
+    xmlhttp.onreadystatechange = function() {
+      if (this.readyState == 4 && this.status == 200) {
+        //response received, call response function now
+        resolve(this.response);
+      }
+    };
+    xmlhttp.send(JSON.stringify(object));
+  })
+}
+
+///////////////////////////////////////
+///////////////////////////////////////
+
+
+
+
+
+
+
+
+///////////////////////////////////////////////
+//////////  START AND END BUTTONS  ////////////
+///////////////////////////////////////////////
+
+
+//takes in a results object from the end run response, and makes a table to add to the DOM
+function displayRunToTable (runResult){
+  const { time,
+        wallet,
+        items } = runResult;
+
+  setTimerBySeconds(time);
+
+
+  for (let i = 0; i < wallet.length; i++){
+    addRowToTable(wallet[i], resultsTable.rows.length);
+  }
+
+  for (let i = 0; i < items.length; i++){
+    addRowToTable(items[i], resultsTable.rows.length);
+  }
+
+  //runResult = {
+  //  time(in seconds),
+  //  wallet [
+  //    { name,
+  //    currid,
+  //    qty },
+  //    {... ],
+  //  items [
+  //    { name,
+  //    itemid,
+  //    qty },
+  //    {... ],
+  //}
+}
+
+//sets timer to correct time based on number of seconds
+function setTimerBySeconds(totalSeconds){
+  let seconds = totalSeconds % 60;
+  let minutes = Math.floor(totalSeconds/60) % 60;
+  let hours = Math.floor(totalSeconds/3600);
+
+  timerDisplay.innerHTML = `${hours}:${minutes}:${seconds}`;
+}
+
+function addRowToTable (element, index){
+  var newRow = resultsTable.insertRow(index);
+  var nameCell = newRow.insertCell(0);
+  var qtyCell = newRow.insertCell(1);
+
+  nameCell.innerHTML = element.name;
+  qtyCell.innerHTML = element.qty;
 }
 
 
 
 
-function makeEditRequest(newName){
+
+
+///////////////////////////////////////////////
+////////  ADD, EDIT, DELETE BUTTONS  //////////
+///////////////////////////////////////////////
+
+
+function addMethodRequest(method){
+  postHttpRequest('/goldFarm/newmethod', method).then((response) =>{
+    var wasAdded = JSON.parse(response);
+    if (wasAdded){
+      addMethodToSelect(name, methodSelect.length-1);
+    }
+    else {
+      alert ('There was an error adding the method to the server.  Please try again.');
+    }
+  });
+}
+
+function addMethodToSelect(name, index){
+  var newOption = document.createElement('option');
+  newOption.value = name;
+  newOption.innerHTML = name;
+  methodSelect.add(newOption, index);
+}
+
+
+function editMethodRequest(newName){
   var methodToEdit = {name: methodSelect.value, newName: newName, username: username};
   var indexToEdit = methodSelect.selectedIndex;
 
-  postHttpRequest('/goldFarm/editmethod', methodToEdit, function(response){
+  postHttpRequest('/goldFarm/editmethod', methodToEdit).then((response) =>{
     var wasEdited = JSON.parse(response);
     if (wasEdited){
-      //need to update the select by deleting and adding again
-      deleteMethodFromSelect(indexToEdit);
-      addMethodToSelect(newName, indexToEdit);
+      editMethodInSelect(newName, indexToEdit);
     }
     else {
       alert('There was an error editing the method on the server. Please try again.');
@@ -215,13 +313,18 @@ function makeEditRequest(newName){
   });
 }
 
+function editMethodInSelect(newName, indexToEdit){
+    //need to update the select by deleting and adding again
+    deleteMethodFromSelect(indexToEdit);
+    addMethodToSelect(newName, indexToEdit);
+}
 
 
-function makeDeleteRequest() {
+function deleteMethodRequest() {
   var methodToDelete = {name: methodSelect.value, username: username};
   var methodIndex = methodSelect.selectedIndex;
 
-  postHttpRequest('/goldFarm/deletemethod', methodToDelete, function(response){
+  postHttpRequest('/goldFarm/deletemethod', methodToDelete).then((response) =>{
     var wasDeleted = JSON.parse(response);
     if (wasDeleted){
       //alert ('The method was successfully deleted');
@@ -233,6 +336,14 @@ function makeDeleteRequest() {
   });
 }
 
+function deleteMethodFromSelect(index){
+  methodSelect.remove(index);
+}
+
+
+
+
+
 function receiveMethods(response) {
   var methods = JSON.parse(response);
   if (methods.length !== 0){
@@ -241,15 +352,4 @@ function receiveMethods(response) {
       addMethodToSelect(methods[i].name, i+1);
     }
   }
-}
-
-function addMethodToSelect(name, index){
-  var newOption = document.createElement('option');
-  newOption.value = name;
-  newOption.innerHTML = name;
-  methodSelect.add(newOption, index);
-}
-
-function deleteMethodFromSelect(index){
-  methodSelect.remove(index);
 }

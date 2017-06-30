@@ -1,4 +1,6 @@
 
+'use strict';
+
 var express = require('express');
 var router = express.Router();
 
@@ -14,16 +16,17 @@ module.exports = router;
 
 
 
-var API_KEY = '58468D10-F7BA-234C-963E-A854D0001EC150A288B8-F8F2-4611-A664-C526CE446B20';
+//var API_KEY = '58468D10-F7BA-234C-963E-A854D0001EC150A288B8-F8F2-4611-A664-C526CE446B20';
 
 var API_KEY_PARAM = 'access_token=';
 
-var API_HOSTNAME = 'api.guildwars2.com';
+const API_HOSTNAME = 'api.guildwars2.com';
 
-var WALLET_PATH = '/v2/account/wallet';
-var MAT_STORAGE_PATH = '/v2/account/materials';
-var BANK_PATH = '/v2/account/bank';
-var CHARACTERS_PATH = '/v2/characters?page=0';
+const WALLET_PATH = '/v2/account/wallet';
+const MAT_STORAGE_PATH = '/v2/account/materials';
+const BANK_PATH = '/v2/account/bank';
+const CHARACTERS_PATH = '/v2/characters?page=0';
+const SHARED_PATH = '/v2/account/inventory';
 
 
 
@@ -41,54 +44,45 @@ var pool = mysql.createPool({
 
 router
   .get('/methods/:username', function (req, res) {
-    console.log('received request to methods');
-    var methods = getMethodsByUsername(req.params.username, function(result){
-      console.log(result);
-
-      res.send(result);
+    //console.log('received request to methods');
+    getMethodsByUsername(req.params.username).then((result) => {
+        //console.log(result);
+        res.send(result);
     });
   })
-  //expected params: (username, methodName)
+  //expected params: (username)
   .get('/startRun', function (req, res) {
+    ///console.log ('startRun');
 
     //first load user and method data from username
-    getUser(req.query.username, function(user){
-      getMethod(req.query.methodName, user.id, function(method){
-
-        //then remove records from that user data from both "run start" tables
-        //create a single record in "run start" table (userid, methodid, timestamp)
-        resetRunTable(user, method, 'runStart', function(){
-
-          //request wallet and store currencies in "run start items"
-          getWallet(user, 'runstartitems');
-
-          //request mat storage, bank and character inventories and add to "run start items"
-          getItems(user, 'runstartitems');
-
+    getUser(req.query.username).then((user) => {
+      //then remove records from that user data from both "run start" tables
+      //create a single record in "run start" table (userid, methodid, timestamp)
+      resetStateTable(user, 'runstart').then(() => {
+        //request all items from API and store them in database
+        saveStateTable(user, 'runstart').then((result) => {
           //each function has already added to the table, so we done, yo
           res.send();
-        });
+        })
       });
     });
   })
   //expected params: (username)
   .get('/endRun', function (req, res) {
+    //console.log ('endRun');
 
     //first load user and method data from username
-    getUser(req.query.username, function(user){
-
+    getUser(req.query.username).then((user) => {
       //then remove records from that user data from both "run start" tables
       //create a single record in "run start" table (userid, methodid, timestamp)
-      resetRunEnd(user, function(result){
-
-        //request wallet and store currencies in "run start items"
-        getWallet(user, 'runenditems');
-
-        //request mat storage, bank and character inventories and add to "run start items"
-        getItems(user, 'runenditems');
-
-        //each function has already added to the table, so we done, yo
-        res.send();
+      resetStateTable(user, 'runend').then(() => {
+        //request all items from API and store them in database
+        saveStateTable(user, 'runend').then((result) => {
+          //after table is updated, send response with all of the differences
+          getRunResultsFromDB(user).then((result) => {
+            res.send(result);
+          });
+        });
       });
 
     });
@@ -97,7 +91,7 @@ router
     //console.log(req.body);
     //add method/return false if method exists
     addMethod(req.body.name, req.body.username, function(result){
-      console.log (result);
+      //console.log (result);
       res.send(result);
     });
   })
@@ -105,7 +99,7 @@ router
     //console.log(req.body);
     //delete method/return false if method exists
     deleteMethod(req.body.name, req.body.username, function(result){
-      console.log(result);
+      //console.log(result);
       res.send(result);
     });
   })
@@ -113,11 +107,20 @@ router
     //console.log(req.body);
     //delete method/return false if method exists
     editMethod(req.body.name, req.body.newName, req.body.username, function(result){
-      console.log(result);
+      //console.log(result);
       res.send(result);
     });
   })
 ;
+
+
+
+
+
+
+
+
+
 
 
 ///////////////////////////////////////////
@@ -125,289 +128,356 @@ router
 ///////////////////////////////////////////
 
 //generic httpS requester for API calls
-function getHttpsRequest(hostname, path, responseFunction){
-            //              console.log('Making https request to: ' + hostname + path);
+function getHttpsRequest(hostname, path){
 
-  var options = {
-    protocol: 'https:',
-    hostname: hostname,
-    path: path,
-    method: 'GET'
-  };
-
-  console.log('making request to ' + hostname + path);
-
-  var req = https.request(options, responseFunction).on('error', function(e) {
-    console.log('problem with request to ' + path + ': ' + e.message);
-    if (e.code == "ECONNRESET"){
-      //console.log("requeueing request");
-      queueRequest('https', hostname, path, responseFunction);
-      afterRequestComplete();
-    }
+  return new Promise((resolve, reject) => {
+  //console.log('making request to ' + hostname + path);
+    var options = {
+      protocol: 'https:',
+      hostname: hostname,
+      path: path,
+      method: 'GET'
+    };
+    var req = https.request(options, resolve).on('error', reject);
+    req.end();
   });
-
-  req.end();
 }
 
 //generic parse data
-function parseResponse(response, onData, onError, onEnd){
-  //start a string to hold the data
-  var dataString = '';
-  response.on('data', function(data) {
-    //when I receive a chunk of data in a response
-    onData(data);
-    dataString += data;
-  }).on('error', function(error) {
-    //in case of an error
-    onError(error);
-    console.error('Error ' + error);
-  }).on('end', function(){
-    //done receiving data and stuff
-    onEnd(dataString);
+function parseResponse(response){
+  return new Promise((resolve, reject) => {
+    //start a string to hold the data
+    var dataString = '';
+    response.on('data', function(data) {
+      //when I receive a chunk of data in a response
+      dataString += data;
+    }).on('error', function(error) {
+      //in case of an error
+      reject(error);
+      console.error('Error ' + error);
+    }).on('end', function(){
+      //done receiving data and stuff
+      //console.log('finished parsing response');
+      resolve(dataString);
+    })
   });
 }
 
 //////////////////////////////////////////
 //////////////////////////////////////////
 
-//fully prepares the runStart tables for run, performs callback on success value
-function resetRunStart(user, method, callback){
-  //remove records from that user data from tables
-  //remove any records that match user.id from both tables
-  var queryString = 'DELETE FROM runstart WHERE userid = ' + user.id;
-  query(queryString, function(err){callback(false);}, function(result){
 
-    queryString = "DELETE FROM runstartitems WHERE userid = " + user.id;
-    query(queryString, function(err){callback(false);}, function(result){
 
-      //create a single record in table (userid, methodid, timestamp)
-      queryString = 'INSERT INTO runstart (userid, methodid) VALUES ' +
-        '('+user.id+', '+method.id+')';
-        query(queryString, function(err){callback(false);}, function(result){
-          callback(true);
-        });
-    });
-  });
-}
 
-//fully prepares the runEnd tables for run, performs callback on success value
-function resetRunEnd(user, callback){
-  //remove records from that user data from tables
-  //remove any records that match user.id from both tables
-  var queryString = 'DELETE FROM runend WHERE userid = ' + user.id;
-  query(queryString, function(err){callback(false);}, function(result){
 
-    queryString = "DELETE FROM runenditems WHERE userid = " + user.id;
-    query(queryString, function(err){callback(false);}, function(result){
 
-      //create a single record in table (userid, methodid, timestamp)
-      queryString = 'INSERT INTO runend (userid) VALUES ' +
-        '('+user.id+')';
-        query(queryString, function(err){callback(false);}, function(result){
-          callback(true);
-        });
-    });
-  });
+
+
+function saveStateTable(user, tableName){
+
+  //saveStateTable DEPENDENCY TREE
+  //  getWalletFromAPI - (getHttpsRequest)
+  //  saveStateWallet
+  //    addCurrencyToSaveState - (query)
+  //  getItemsFromAPI
+  //    getMatsFromAPI - (getHttpsRequest)
+  //    getBankFromAPI - (getHttpsRequest)
+  //    getInventoriesFromAPI - (getHttpsRequest)
+  //    consolodateItemsToNewArray
+  //  saveStateItems
+  //    addItemToSaveState - (query)
+
+  return Promise.all([
+    new Promise((resolve, reject) => {
+      //get wallet from api
+      getWalletFromAPI(user, tableName).then((wallet) => {
+        //  THEN query insert for every currency
+        saveStateWallet(wallet, user, tableName + 'wallet').then((values) => {
+          resolve(values);
+        })
+      })
+    }),
+    new Promise((resolve, reject) => {
+      //get items from function tht makes all 3 API calls
+      getItemsFromAPI(user).then((items) => {
+        //  THEN query insert for every item
+        saveStateItems(user, items, tableName + 'items').then((values) => {
+          resolve(values)
+        })
+      })
+    })
+  ]);
 }
 
 
 //gets all currencies from user's wallet and stores them in the run start table
-function getWallet(user, tableName){
-  //make request to API for currencies
-  var hostname = API_HOSTNAME;
-  var path = WALLET_PATH + '?' + API_KEY_PARAM + user.apikey;
-  getHttpsRequest(hostname, path, function(response){
-
-    parseResponse(response, function(data){}, function(error){},
-      function(endData){
-        wallet = JSON.parse(endData);
-        for (var i = 0; i < wallet.length; i++){
-          //get the currency ID, and qty and story it in the "run start items" table
-          var queryString = "INSERT INTO " + tableName + " (userid, currid, qty) VALUES " +
-          "("+user.id+", "+wallet[i].id+", "+wallet[i].value+")";
-          query(queryString, function(err){}, function(result){});
-        }
+function getWalletFromAPI(user){
+  return new Promise((resolve, reject) => {
+    //make request to API for currencies
+    var hostname = API_HOSTNAME;
+    var path = WALLET_PATH + '?' + API_KEY_PARAM + user.apikey;
+    getHttpsRequest(hostname, path).then((response) => {
+      parseResponse(response).then ((endData) => {
+        let wallet = JSON.parse(endData);
+        resolve(wallet);
       });
+    });
+  })
+}
+
+//given an array of currencies(wallet), stores them in an indicated runtable
+function saveStateWallet(wallet, user, tableName){
+    let currencyAdds = [];
+    for (var i = 0; i < wallet.length; i++){
+      //get the currency ID, and qty and story it in the "run start/end items" table
+      currencyAdds.push(addCurrencyToSaveState(user.id, wallet[i].id, wallet[i].value, tableName));
+    }
+    return Promise.all(currencyAdds);
+}
+
+
+
+//gets all items from all 4 API calls, and returns a consolodated associated array
+function getItemsFromAPI(user){
+  return new Promise ((resolve, reject) => {
+    Promise.all([
+      getMatsFromAPI(user),
+      getBankFromAPI(user),
+      getInventoriesFromAPI(user),
+      getSharedFromAPI(user)
+    ]).then((values) => {
+      //  THEN consolodate into associative array
+      let items = {};
+      for (let i = 0; i < values.length; i++){
+        //console.log(values[i])
+        consolodateItemsToNewArray(user, values[i], items);
+      }
+      resolve(items);
+    });
   });
 }
 
 
-//gets all items from all 3 API calls, adds them to a local associated hashtable and upon commpletion
-function getItems(user, tableName){
-  var isDone = {mats: false, bank: false, inventories: false};
-  var items = {};
-
-  //call each of the 3 API functions here
-  getMats(user, items, function(){
-    isDone.mats = true;
-    console.log('mats done');
-    if (isDone.mats && isDone.bank && isDone.inventories){
-      //finally store in database
-      addItemsToTable(user.id, items, tableName, function(result){
-        console.log(result + ' done');
-      });
-    }
-  });
-
-  getBank(user, items, function(){
-    isDone.bank = true;
-    console.log('bank done');
-    if (isDone.mats && isDone.bank && isDone.inventories){
-      //finally store in database
-      addItemsToTable(user.id, items, tableName, function(result){
-        console.log(result + ' done');
-      });
-    }
-  });
-
-  getInventories(user, items, function(){
-    isDone.inventories = true;
-    console.log('inventories done');
-    if (isDone.mats && isDone.bank && isDone.inventories){
-      //finally store in database
-      addItemsToTable(user.id, items, tableName, function(result){
-        console.log(result + ' done');
-      });
-    }
-  });
-}
 
 //gets all the materials from material storage of the user and tries to add adds them to items object
-function getMats(user, items, callback){
-  var hostname = API_HOSTNAME;
-  var path = MAT_STORAGE_PATH + '?' + API_KEY_PARAM + user.apikey;
-  getHttpsRequest(hostname, path, function(response){
-    parseResponse(response, function(data){}, function(err){},
-      function(endData){
-        //store all mats into table
-        matStorage = JSON.parse(endData);
-        for (var i = 0; i < matStorage.length; i++){
-          //add item to table
-          addItemToArray(user.id, matStorage[i].id, matStorage[i].count, items);
-        }
-        callback();
-      });
+function getMatsFromAPI(user){
+  return new Promise((resolve, reject) => {
+    var hostname = API_HOSTNAME;
+    var path = MAT_STORAGE_PATH + '?' + API_KEY_PARAM + user.apikey;
+    getHttpsRequest(hostname, path).then((response) => {
+      parseResponse(response).then ((endData) => {
+          //store all mats into table
+          let mats = JSON.parse(endData)
+          resolve(mats);
+        });
+    });
   });
 }
 
 //gets all the materials from material storage of the user and adds them to items object
-function getBank(user, items, callback){
-  var hostname = API_HOSTNAME;
-  var path = BANK_PATH + '?' + API_KEY_PARAM + user.apikey;
-  getHttpsRequest(hostname, path, function(response){
-    parseResponse(response, function(data){}, function(err){},
-      function(endData){
-        //store all bank items into table
-        bankItems = JSON.parse(endData);
-        for (var i = 0; i < bankItems.length; i++){
-          //add item to table
-          if (bankItems[i] !== null){
-            addItemToArray(user.id, bankItems[i].id, bankItems[i].count, items);
-          }
-        }
-        callback();
-      });
+function getBankFromAPI(user){
+  return new Promise((resolve, reject) => {
+    var hostname = API_HOSTNAME;
+    var path = BANK_PATH + '?' + API_KEY_PARAM + user.apikey;
+    getHttpsRequest(hostname, path).then((response) => {
+      parseResponse(response).then ((endData) => {
+          //store all bank items into table
+          let bankItems = JSON.parse(endData);
+          resolve(bankItems);
+        });
+    });
   });
 }
 
 //gets all the materials from material storage of the user and adds them to items object
-function getInventories(user, items, callback){
-  var hostname = API_HOSTNAME;
-  var path = CHARACTERS_PATH + '&' + API_KEY_PARAM + user.apikey;
-  getHttpsRequest(hostname, path, function(response){
-    parseResponse(response, function(data){}, function(err){},
-      function(endData){
+function getInventoriesFromAPI(user){
+
+  return new Promise((resolve, reject) => {
+    const hostname = API_HOSTNAME;
+    const path = CHARACTERS_PATH + '&' + API_KEY_PARAM + user.apikey;
+    getHttpsRequest(hostname, path).then((response) => {
+      parseResponse(response).then ((endData) => {
+        //array for holding all the items to return
+        let inventoryItems = []
         //array of characters
-        var characters = JSON.parse(endData);
+        let characters = JSON.parse(endData);
         //loop through each character
-        for (var i = 0; i < characters.length; i++){
-          var bags = characters[i].bags;
+        for (let i = 0; i < characters.length; i++){
+          let bags = characters[i].bags;
           //loop through each bag on the character
-          for (var j = 0; j < bags.length; j++){
-            var inventory = bags[j].inventory;
+          for (let j = 0; j < bags.length; j++){
+            let inventory = bags[j].inventory;
             //loop through each item slot
-            for (var k = 0; k < inventory.length; k++){
+            for (let k = 0; k < inventory.length; k++){
               //NOW WE GOT ITEMS YO
               if (inventory[k] !== null){
-                addItemToArray(user.id, inventory[k].id, inventory[k].count, items);
+                inventoryItems.push(inventory[k]);
               }
             }
           }
         }
-
-  //{
-  //   "bags": [
-  //     {
-  //       "id": 38013,
-  //       "size": 20,
-  //       "inventory": [
-  //         {
-  //           "id": 73718,
-  //           "count": 1,
-  //           "binding": "Account"
-  //         },
-  //         {
-  //           "id": 19986,
-  //           "count": 1,
-  //           "charges": 21,
-  //           "binding": "Account"
-  //         },
-  //         {
-  //           "id": 79105,
-  //           "count": 1,
-  //           "charges": 2,
-  //           "binding": "Account"
-  //         },
-  //         {
-  //           "id": 19992,
-  //           "count": 6,
-  //           "binding": "Account"
-  //         },
-  //         {
-  //           "id": 19699,
-  //           "count": 7
-  //         },
-  //         {
-  //           "id": 24628,
-  //           "count": 1
-  //         },
-  //         null,
-  //         null,
-  //         null,
-  //         null,
-  //         null,
-  //         null,
-  //         null,
-  //         null,
-  //         null,
-  //         null,
-  //         null,
-  //         null,
-  //         null,
-  //         null
-  //       ]
-  //     }
-  //   ]
-  // }
-
-        callback();
+        resolve(inventoryItems);
       });
+    });
   });
 }
 
+//gets the items in shared inventory slots from the API
+function getSharedFromAPI(user){
+  return new Promise((resolve, reject) => {
+    var hostname = API_HOSTNAME;
+    var path = SHARED_PATH + '?' + API_KEY_PARAM + user.apikey;
+    getHttpsRequest(hostname, path).then((response) => {
+      parseResponse(response).then ((endData) => {
+          //store all bank items into table
+          let sharedItems = JSON.parse(endData);
+          resolve(sharedItems);
+        });
+    });
+  });
+}
 
-
-//incorporate item into associated array, adding qty if already there
-function addItemToArray(userid, itemid, qty, items){
-  //check if itemid hasn't been added yet
-  if (items[itemid]){
-    //if item already there, add the qty
-    items[itemid].qty += qty;
-  } else {
-    //if not, add to hashset
-    items[itemid] = {userid: userid, itemid: itemid, qty: qty};
+//move from items[] tp newItems{}(associative array) while checking for previous entries
+function consolodateItemsToNewArray(user, items, newItems){
+  for (let i = 0; i < items.length; i++){
+    //first check if item is NULL!
+    if (items[i] !== null){
+      //check if itemid hasn't been added yet
+      if (newItems[items[i].id]){
+        //if item already there, add the qty
+        newItems[items[i].id].qty += items[i].count;
+      } else {
+        //if not, add to hashset
+        newItems[items[i].id] = {userid: user.id, itemid: items[i].id, qty: items[i].count};
+      }
+    }
   }
 }
+
+//given an associative array of nicely trimmed items (all itemids unique) adds them to table
+function saveStateItems(user, items, tableName){
+  let itemAdds = [];
+  for (var key in items){
+    if (items.hasOwnProperty(key)){
+      //get the item ID, and qty and add it to the "run start/end items" table
+      itemAdds.push(addItemToSaveState(user.id, items[key].itemid, items[key].qty, tableName));
+    }
+  }
+  return Promise.all(itemAdds);
+}
+
+
+
+
+//////// COMPARE TABLE FUNCTIONS /////////
+
+
+
+function getRunResultsFromDB(user){
+  //call 3 db queries to get start and end outerjoin on userid + itemid/currid where qtys are not equal?
+  return new Promise((resolve, reject) => {
+    //for the main table, compare the start and end times to get the total time elapsed
+
+    Promise.all([
+      getTimeResultFromDB(user),
+      getWalletResultFromDB(user),
+      getItemsResultFromDB(user)
+    ]).then((values) => {
+      resolve({
+        time: values[0],
+        wallet: values[1],
+        items: values[2]
+      })
+    })
+  });
+}
+
+function getTimeResultFromDB(user) {
+  return new Promise((resolve, result) => {
+    let timeQueryString =
+      'SELECT start.timestamp starttime, end.timestamp endtime FROM ' +
+        'runstart start INNER JOIN runend end ' +
+        'ON start.userid = end.userid ' +
+        'WHERE start.userid = ' + user.id + ';';
+    query(timeQueryString).then((result) => {
+      //compare the starttime to end time
+      let elapsedSeconds = (result[0].endtime - result[0].starttime)/1000;
+      resolve(elapsedSeconds);
+    })
+  })
+}
+
+function getWalletResultFromDB(user) {
+  return new Promise((resolve, reject) => {
+    let walletQueryString =
+      'SELECT compare.userid, currencylookup.name, compare.currid, compare.startqty, compare.endqty FROM ' +
+        '(SELECT end.userid, end.currid, start.qty startqty, end.qty endqty FROM ' +
+          'runstartwallet start LEFT OUTER JOIN runendwallet end ' +
+          'ON start.currid = end.currid ' +
+          'WHERE start.userid = ' + user.id + ' AND start.qty != end.qty ' +
+        'UNION ' +
+        'SELECT end.userid, end.currid, start.qty startqty, end.qty endqty FROM ' +
+          'runstartwallet start RIGHT OUTER JOIN runendwallet end ' +
+          'ON start.currid = end.currid ' +
+          'WHERE end.userid = ' + user.id + ' AND start.currid IS NULL) compare ' +
+      'INNER JOIN currencylookup ' +
+      'ON compare.currid = currencylookup.id;';
+    query(walletQueryString).then((result) => {
+      let walletResult = result.map((record) => {
+        let newRecord = {
+          userid: record.userid,
+          name: record.name,
+          currid: record.currid
+        }
+        if (record.startqty === null)     {newRecord.qty = record.endqty}
+        else if (record.endqty === null)  {newRecord.qty = 0 - record.startqty}
+        else                              {newRecord.qty = record.endqty - record.startqty}
+        return newRecord;
+      })
+      resolve(walletResult);
+    })
+  })
+}
+
+function getItemsResultFromDB(user) {
+  return new Promise((resolve, reject) => {
+    let itemsQueryString =
+      'SELECT compare.userid, itemlookup.name, compare.itemid, compare.startqty, compare.endqty FROM ' +
+        '(SELECT end.userid, end.itemid, start.qty startqty, end.qty endqty FROM ' +
+          'runstartitems start LEFT OUTER JOIN runenditems end ' +
+          'ON start.itemid = end.itemid ' +
+          'WHERE start.userid = ' + user.id + ' AND start.qty != end.qty ' +
+        'UNION ' +
+        'SELECT end.userid, end.itemid, start.qty startqty, end.qty endqty FROM ' +
+          'runstartitems start RIGHT OUTER JOIN runenditems end ' +
+          'ON start.itemid = end.itemid ' +
+          'WHERE end.userid = ' + user.id + ' AND start.itemid IS NULL) compare ' +
+      'INNER JOIN itemlookup ' +
+      'ON compare.itemid = itemlookup.id;';
+    query(itemsQueryString).then((result) => {
+      let itemsResult = result.map((record) => {
+        let newRecord = {
+          userid: record.userid,
+          name: record.name,
+          itemid: record.itemid
+        }
+        if (record.startqty === null)     {newRecord.qty = record.endqty}
+        else if (record.endqty === null)  {newRecord.qty = 0 - record.startqty}
+        else                              {newRecord.qty = record.endqty - record.startqty}
+        return newRecord;
+      })
+      resolve(itemsResult);
+    })
+  })
+}
+
+
+
+
+
+
+
+
 
 
 //////////////////////////////////////////
@@ -415,220 +485,190 @@ function addItemToArray(userid, itemid, qty, items){
 //////////////////////////////////////////
 
 // basic wrapper function for a simple query
-function query(queryString, errorFunction, resultFunction){
-  pool.getConnection(function(err, mysqlConnection){
-    if (err){
-      console.error(err);
-      return;
-    }
-    var query = mysqlConnection.query(queryString, function(err, result){
-      // console.log(query.sql);
-      mysqlConnection.release();
-
+function query(queryString){
+  return new Promise((resolve, reject) => {
+    pool.getConnection(function(err, mysqlConnection){
       if (err){
-        console.error(err);
-        errorFunction(err);
-        return;
+        reject(err);
       }
-      resultFunction(result);
+      let query = mysqlConnection.query(queryString, function(err, result){
+        //console.log(query.sql);
+        mysqlConnection.release();
+
+        if (err){
+          reject(err);
+        }
+        resolve(result);
+      });
     });
   });
 }
 
+
 /////////////////////////////////////////
 /////////////////////////////////////////
 
 
-//adds all of the items in an array to the database
-function addItemsToTable(userid, items, tableName, callback){
-  //have to iterate through items,
-  for (var key in items){
-    if (items.hasOwnProperty(key)){
-      //then we need to add this item to the table
-      addItemToTable(userid, items[key].itemid, items[key].qty, tableName, function(result){});
-    }
-  }
-  callback();
+
+
+//fully prepares the run state tables for the run
+function resetStateTable(user, tableName){
+
+  //recreate record in main table to reset timestamp(delete, then when done, insert)
+  const mainDeleteQueryString = 'DELETE FROM ' + tableName + ' WHERE userid = ' + user.id;
+  const mainInsertQueryString = 'INSERT INTO ' + tableName + ' (userid) VALUES ' + '('+user.id+')'
+  //delete all records from wallet
+  const walletDeleteQueryString = 'DELETE FROM ' + tableName + 'wallet WHERE userid = ' + user.id;
+  //delete all records from items
+  const itemsDeleteQueryString = 'DELETE FROM ' + tableName + 'items WHERE userid = ' + user.id;
+
+  //when all done, resolve
+  return Promise.all([
+    new Promise ((resolve, reject) => {
+      query(mainDeleteQueryString).then((result) => {})
+      .then(() => {
+        query(mainInsertQueryString).then( (result) => {resolve();} );
+      })
+    }),
+    query(walletDeleteQueryString).then((result) => {}),
+    query(itemsDeleteQueryString).then((result) => {})
+  ]);
 }
 
-
-//function to add item to run start/end, adding qty if item is already in table
-function addItemToTable(userid, itemid, qty, tableName, callback){
-
-  if (itemid === 77886) console.log ('addig item 77886');
-
-  //check for itemid in the table
-  var queryString = 'SELECT * FROM ' + tableName + ' WHERE itemid = ' + itemid +
-    ' AND userid = ' + userid;
-  query(queryString, function(err){}, function(result){
-
-    //if it's not there, insert the record
-    if (result.length === 0){
-      queryString = 'INSERT INTO ' + tableName + '(userid, itemid, qty) VALUES ' +
-        '('+userid+', '+itemid+', '+qty+')';
-
-        if (itemid === 77886) console.log(queryString);
-
-      query(queryString, function(err){}, function(result){
-        callback(result);
-      });
-    }
-    else if (result.length === 1){
-      //if it is, update the record
-      var newQty = result[0].qty + qty;
-      queryString = 'UPDATE ' + tableName + ' SET qty = ' + newQty +
-        ' WHERE itemid = ' + itemid + ' AND userid = ' + userid;
-
-      if (itemid === 77886) console.log(queryString);
-
-      query(queryString, function(err){}, function(result){
-        callback(result);
-      });
-    }
-    else {
-      console.log ('error, there is more than one record with this item and user id');
-    }
-
-  });
+//function to add currency to run start/end
+function addCurrencyToSaveState(userid, currid, qty, tableName){
+  let queryString = 'INSERT INTO ' + tableName + ' (userid, currid, qty) VALUES ' +
+                  '('+userid+', '+currid+', '+qty+')';
+  return query(queryString);
 }
+
+//function to add item to run start/end
+function addItemToSaveState(userid, itemid, qty, tableName){
+  //if it's not there, insert the record
+  let queryString = 'INSERT INTO ' + tableName + '(userid, itemid, qty) VALUES ' +
+    '('+userid+', '+itemid+', '+qty+')';
+  return query(queryString);
+}
+
 
 //search mySQL database for methods under username
-function getMethodsByUsername(username, callback){
-  //sql query for table with only methods with a userid that matches the username
-  var queryString = 'SELECT name FROM users INNER JOIN methods ON users.id = methods.userid ' +
-    'WHERE users.username = "' + username + '"';
+function getMethodsByUsername(username){
+  return new Promise((resolve, reject) => {
+    //sql query for table with only methods with a userid that matches the username
+    let  queryString = 'SELECT name FROM users INNER JOIN methods ON users.id = methods.userid ' +
+      'WHERE users.username = "' + username + '"';
 
-  query(queryString, function(err){}, callback);
+
+    query(queryString).then((result) => {resolve(result)});
+  })
 }
 
 //add method to methods table, return success status
-function addMethod(methodName, username, callback){
+function addMethod(methodName, username){
+  return new Promise((resolve, reject) => {
+    //first verify that username is correct
+    getUser(username).then((user) => {
+      //next check if method with same user and name exists, if so, return false (unsuccessful)
+      checkMethodNameExists(methodName, user.id).then((methodExists) => {
 
-  //first verify that username is correct
-  getUser(username, function(user){
-    //next check if method with same user and name exists, if so, return false (unsuccessful)
-    checkMethodNameExists(methodName, user.id, function(methodExists){
-
-      if(methodExists){
-        callback(false);
-      }
-      else {
-        var queryString = 'INSERT INTO methods (name, userid) VALUES ' +
-          '("' + methodName + '",' + user.id + ')';
-        query(queryString,
-          function(err){
-            if (err) callback(false);
-        }, function(result){
-          if (result){
-            callback(true);
-          }
-        });
-      }
+        if(methodExists){
+          resolve(false);
+        }
+        else {
+          var queryString = 'INSERT INTO methods (name, userid) VALUES ' +
+            '("' + methodName + '",' + user.id + ')';
+          query(queryString).then((result) => {
+            if (result){
+              resolve(true);
+            }
+          })
+        }
+      });
     });
   });
-
 }
 
 //delete method return succes status
-function deleteMethod(methodName, username, callback){
-  //first verify that username is correct
-  getUser(username, function(user){
-    //next check if method with same user and name exists, if not, return false (unsuccessful)
-    checkMethodNameExists(methodName, user.id, function(methodExists){
+function deleteMethod(methodName, username){
+  return new Promise((resolve, reject) => {
+    //first verify that username is correct
+    getUser(username).then((user) => {
+      //next check if method with same user and name exists, if not, return false (unsuccessful)
+      checkMethodNameExists(methodName, user.id).then((methodExists) => {
 
-      if(!methodExists){
-        callback(false);
-      }
-      else {
-        //here, we know method does exist, so we can delete safely
-        var queryString = 'DELETE FROM methods WHERE name = "' + methodName + '" AND userid = ' + user.id;
+        if(!methodExists){
+          resolve(false);
+        }
+        else {
+          //here, we know method does exist, so we can delete safely
+          var queryString = 'DELETE FROM methods WHERE name = "' + methodName + '" AND userid = ' + user.id;
 
-        query(queryString,
-          function(err){
-          if (err) callback(false);
-        }, function(result){
-          if (result){
-            callback(true);
-          }
-        });
-      }
+          query(queryString).then((result) => {
+            if (result){
+              resolve(true);
+            }
+          })
+        }
+      });
     });
   });
-
 }
 
 //edit method name return succes status
-function editMethod(methodName, newName, username, callback){
-  //first verify that username is correct
-  getUser(username, function(user){
-    console.log (user);
-    //next check if method with same user and name exists, if not, return false (unsuccessful)
-    checkMethodNameExists(methodName, user.id, function(methodExists){
+function editMethod(methodName, newName, username){
+  return new Promise((resolve, reject) => {
+    //first verify that username is correct
+    getUser(username).then((user) => {
+      //next check if method with same user and name exists, if not, return false (unsuccessful)
+      checkMethodNameExists(methodName, user.id).then((methodExists) => {
+        if(!methodExists){
+          resolve(false);
+        }
+        else {
+          //here, we know method does exist, so we can edit safely
+          var queryString = 'UPDATE methods SET name = "' + newName +
+            '" WHERE name = "' + methodName + '" AND userid = ' + user.id;
 
-      if(!methodExists){
-        callback(false);
-      }
-      else {
-        //here, we know method does exist, so we can edit safely
-        var queryString = 'UPDATE methods SET name = "' + newName +
-          '" WHERE name = "' + methodName + '" AND userid = ' + user.id;
-
-        query(queryString,
-          function(err){
-          if (err) callback(false);
-        }, function(result){
-          if (result){
-            callback(true);
-          }
-        });
-      }
+          query(queryString).then((result) => {
+            if (result){
+              resolve(true);
+            }
+          })
+        }
+      });
     });
   });
-
 }
 
 //used for edit/delete requests, check to make sure method+userid is actually in the table
-function checkMethodNameExists(name, userid, callback){
-  //check if method with same user and name exists, if so, return false (unsuccessful)
-  var queryString = 'SELECT id FROM methods ' +
-    'WHERE name = "' + name + '" AND userid = ' + userid;
-
-  query(queryString, function(err){}, function(result){
-    if (result.length === 0){
-      //if no results, that means there is no method with same name for this userid
-      callback(false);
-    }
-    else {
-      callback(true);
-    }
+function checkMethodNameExists(methodName, userid){
+  return new Promise((resolve, reject) => {
+    //check if method with same user and name exists, if so, return false (unsuccessful)
+    getMethod(methodName, userid).then((result) => {
+      if (result.length === 0){
+        //if no results, that means there is no method with same name for this userid
+        resolve(false);
+      }
+      else {
+        resolve(true);
+      }
+    });
   });
 }
 
-function getUser(username, callback){
-
-  var queryString = "SELECT * FROM users WHERE username = '" + username + "'";
-
-  query(queryString, function(err){},  function(result){
-    if (result.length === 1){
-      callback(result[0]);
-    }
-    else {
-      callback(null);
-    }
-  });
+function getUser(username){
+  return new Promise((resolve, reject) => {
+    var queryString = 'SELECT * FROM users WHERE username = "' + username + '"';
+    query(queryString).then((result) => {
+      if (result.length === 1){      resolve(result[0]); }
+      else if (result.length === 0){ reject(new Error('no user matches the given username')); }
+      else {                         reject(new Error('more than one user with this username'))}
+    });
+  })
 }
 
-function getMethod(methodName, userid, callback){
-
+function getMethod(methodName, userid){
   var queryString = 'SELECT * FROM methods ' +
     'WHERE name = "' + methodName + '" AND userid = ' + userid;
-
-  query(queryString, function(err){},  function(result){
-    if (result.length === 1){
-      callback(result[0]);
-    }
-    else {
-      callback(null);
-    }
-  });
+  return query(queryString);
 }
