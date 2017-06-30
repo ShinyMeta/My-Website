@@ -411,6 +411,7 @@ function saveStateItems(user, items, tableName){
       itemAdds.push(addItemToSaveState(user.id, items[key].itemid, items[key].qty, tableName));
     }
   }
+  console.log(itemAdds.length);
   return Promise.all(itemAdds);
 }
 
@@ -552,7 +553,7 @@ function query(queryString){
         reject(err);
       }
       let query = mysqlConnection.query(queryString, function(err, result){
-        console.log(query.sql);
+        // console.log(query.sql);
         mysqlConnection.release();
 
         if (err){
