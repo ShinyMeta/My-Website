@@ -62,6 +62,7 @@ router
         //request all items from API and store them in database
         saveStateTable(user, 'runstart').then((result) => {
           //each function has already added to the table, so we done, yo
+          console.log('all done')
           res.send();
         })
       });
@@ -199,6 +200,7 @@ function saveStateTable(user, tableName){
       getWalletFromAPI(user, tableName).then((wallet) => {
         //  THEN query insert for every currency
         saveStateWallet(wallet, user, tableName + 'wallet').then((values) => {
+        console.log('wallet done')
           resolve(values);
         })
       })
@@ -211,6 +213,7 @@ function saveStateTable(user, tableName){
       getItemsFromAPI(user).then((items) => {
         //  THEN query insert for every item
         saveStateItems(user, items, tableName + 'items').then((values) => {
+        console.log('items done')
           resolve(values)
         })
       })
