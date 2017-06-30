@@ -65,6 +65,9 @@ router
           res.send();
         })
       });
+    })
+    .catch((err) => {
+      console.error(err);
     });
   })
   //expected params: (username)
@@ -85,6 +88,9 @@ router
         });
       });
 
+    })
+    .catch((err) => {
+      console.error(err);
     });
   })
   .post('/newmethod', function (req, res) {
