@@ -199,7 +199,6 @@ function saveStateTable(user, tableName){
       getWalletFromAPI(user, tableName).then((wallet) => {
         //  THEN query insert for every currency
         saveStateWallet(wallet, user, tableName + 'wallet').then((values) => {
-        console.log('wallet done')
           resolve(values);
         })
       })
@@ -212,7 +211,6 @@ function saveStateTable(user, tableName){
       getItemsFromAPI(user).then((items) => {
         //  THEN query insert for every item
         saveStateItems(user, items, tableName + 'items').then((values) => {
-        console.log('items done')
           resolve(values)
         })
       })
@@ -233,7 +231,6 @@ function getWalletFromAPI(user){
     getHttpsRequest(hostname, path).then((response) => {
       parseResponse(response).then ((endData) => {
         let wallet = JSON.parse(endData);
-        console.log('wallet done')
         resolve(wallet);
       })
       .catch((err) => {
@@ -293,7 +290,6 @@ function getMatsFromAPI(user){
         //store all mats into table
         let mats = JSON.parse(endData)
         resolve(mats);
-        console.log('mats done')
       })
       .catch((err) => {
         console.error(err);
@@ -315,7 +311,6 @@ function getBankFromAPI(user){
         //store all bank items into table
         let bankItems = JSON.parse(endData);
         resolve(bankItems);
-        console.log('bank done')
       })
       .catch((err) => {
         console.error(err);
@@ -354,7 +349,6 @@ function getInventoriesFromAPI(user){
             }
           }
         }
-        console.log('inventory done')
         resolve(inventoryItems);
       })
       .catch((err) => {
@@ -555,7 +549,7 @@ function query(queryString){
         reject(err);
       }
       let query = mysqlConnection.query(queryString, function(err, result){
-        //console.log(query.sql);
+        console.log(query.sql);
         mysqlConnection.release();
 
         if (err){
