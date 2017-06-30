@@ -202,6 +202,9 @@ function saveStateTable(user, tableName){
           resolve(values);
         })
       })
+      .catch((err) => {
+        console.error(err);
+      })
     }),
     new Promise((resolve, reject) => {
       //get items from function tht makes all 3 API calls
@@ -210,6 +213,9 @@ function saveStateTable(user, tableName){
         saveStateItems(user, items, tableName + 'items').then((values) => {
           resolve(values)
         })
+      })
+      .catch((err) => {
+        console.error(err);
       })
     })
   ]);
@@ -226,7 +232,13 @@ function getWalletFromAPI(user){
       parseResponse(response).then ((endData) => {
         let wallet = JSON.parse(endData);
         resolve(wallet);
+      })
+      .catch((err) => {
+        console.error(err);
       });
+    })
+    .catch((err) => {
+      console.error(err);
     });
   })
 }
@@ -259,6 +271,9 @@ function getItemsFromAPI(user){
         consolodateItemsToNewArray(user, values[i], items);
       }
       resolve(items);
+    })
+    .catch((err) => {
+      console.error(err);
     });
   });
 }
@@ -272,10 +287,16 @@ function getMatsFromAPI(user){
     var path = MAT_STORAGE_PATH + '?' + API_KEY_PARAM + user.apikey;
     getHttpsRequest(hostname, path).then((response) => {
       parseResponse(response).then ((endData) => {
-          //store all mats into table
-          let mats = JSON.parse(endData)
-          resolve(mats);
-        });
+        //store all mats into table
+        let mats = JSON.parse(endData)
+        resolve(mats);
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+    })
+    .catch((err) => {
+      console.error(err);
     });
   });
 }
@@ -287,10 +308,16 @@ function getBankFromAPI(user){
     var path = BANK_PATH + '?' + API_KEY_PARAM + user.apikey;
     getHttpsRequest(hostname, path).then((response) => {
       parseResponse(response).then ((endData) => {
-          //store all bank items into table
-          let bankItems = JSON.parse(endData);
-          resolve(bankItems);
-        });
+        //store all bank items into table
+        let bankItems = JSON.parse(endData);
+        resolve(bankItems);
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+    })
+    .catch((err) => {
+      console.error(err);
     });
   });
 }
@@ -323,7 +350,13 @@ function getInventoriesFromAPI(user){
           }
         }
         resolve(inventoryItems);
+      })
+      .catch((err) => {
+        console.error(err);
       });
+    })
+    .catch((err) => {
+      console.error(err);
     });
   });
 }
@@ -335,10 +368,16 @@ function getSharedFromAPI(user){
     var path = SHARED_PATH + '?' + API_KEY_PARAM + user.apikey;
     getHttpsRequest(hostname, path).then((response) => {
       parseResponse(response).then ((endData) => {
-          //store all bank items into table
-          let sharedItems = JSON.parse(endData);
-          resolve(sharedItems);
-        });
+        //store all bank items into table
+        let sharedItems = JSON.parse(endData);
+        resolve(sharedItems);
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+    })
+    .catch((err) => {
+      console.error(err);
     });
   });
 }
@@ -395,6 +434,9 @@ function getRunResultsFromDB(user){
         items: values[2]
       })
     })
+    .catch((err) => {
+      console.error(err);
+    })
   });
 }
 
@@ -409,6 +451,9 @@ function getTimeResultFromDB(user) {
       //compare the starttime to end time
       let elapsedSeconds = (result[0].endtime - result[0].starttime)/1000;
       resolve(elapsedSeconds);
+    })
+    .catch((err) => {
+      console.error(err);
     })
   })
 }
@@ -442,6 +487,9 @@ function getWalletResultFromDB(user) {
       })
       resolve(walletResult);
     })
+    .catch((err) => {
+      console.error(err);
+    })
   })
 }
 
@@ -473,6 +521,9 @@ function getItemsResultFromDB(user) {
         return newRecord;
       })
       resolve(itemsResult);
+    })
+    .catch((err) => {
+      console.error(err);
     })
   })
 }
@@ -565,7 +616,8 @@ function getMethodsByUsername(username){
       'WHERE users.username = "' + username + '"';
 
 
-    query(queryString).then((result) => {resolve(result)});
+    query(queryString).then((result) => {resolve(result)})
+    .catch((err) => { console.error(err) });
   })
 }
 
@@ -589,8 +641,10 @@ function addMethod(methodName, username){
             }
           })
         }
-      });
-    });
+      })
+      .catch((err) => { console.error(err) });
+    })
+    .catch((err) => { console.error(err) });
   });
 }
 
@@ -614,9 +668,12 @@ function deleteMethod(methodName, username){
               resolve(true);
             }
           })
+          .catch((err) => { console.error(err) })
         }
-      });
-    });
+      })
+      .catch((err) => { console.error(err) });
+    })
+    .catch((err) => { console.error(err) });
   });
 }
 
@@ -640,9 +697,12 @@ function editMethod(methodName, newName, username){
               resolve(true);
             }
           })
+          .catch((err) => { console.error(err) })
         }
-      });
-    });
+      })
+      .catch((err) => { console.error(err) });
+    })
+    .catch((err) => { console.error(err) });
   });
 }
 
@@ -658,7 +718,8 @@ function checkMethodNameExists(methodName, userid){
       else {
         resolve(true);
       }
-    });
+    })
+    .catch((err) => { console.error(err) });
   });
 }
 
@@ -669,7 +730,8 @@ function getUser(username){
       if (result.length === 1){      resolve(result[0]); }
       else if (result.length === 0){ reject(new Error('no user matches the given username')); }
       else {                         reject(new Error('more than one user with this username'))}
-    });
+    })
+    .catch((err) => { console.error(err) });
   })
 }
 
