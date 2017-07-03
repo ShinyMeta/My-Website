@@ -1,6 +1,6 @@
 
 
-var username = 'shinymeta';
+let username = 'shinymeta';
 
 
 
@@ -64,7 +64,7 @@ startButton.addEventListener('click', startButtonListener);
 function startButtonListener(e) {
 
   //send start run request and begin timer and stuff
-  var startRunURL ='/goldFarm/startRun?username=' + username;
+  let startRunURL ='/goldFarm/startRun?username=' + username;
 
   getHttpRequest(startRunURL).then((response) => {
     //start timer
@@ -77,7 +77,7 @@ endButton.addEventListener('click', endButtonListener);
 
 function endButtonListener(e) {
   //otherwise, send start run request and begin timer and stuff
-  var endRunURL ='/goldFarm/endRun?username=' + username;
+  let endRunURL ='/goldFarm/endRun?username=' + username;
 
   //response = {
   //  time(in seconds),
@@ -105,13 +105,13 @@ addButton.addEventListener('click', addButtonListener);
 
 function addButtonListener(e) {
   //if add new, then prompt for name and send server requeest to make new farm
-  var name = prompt ('What is the name of this method?');
+  let name = prompt ('What is the name of this method?');
   if (name === null || name === ''){
     alert ('You gotta put something there, silly. Try again');
     return;
   }
 
-  var method = {name: name, username: username};
+  let method = {name, username};
   addMethodRequest(method);
 }
 
@@ -126,7 +126,7 @@ function editButtonListener(e){
   }
   //if a method is selected, prompt for new name.
   else {
-    var newName = prompt('What would you like the new name for "' +
+    let newName = prompt('What would you like the new name for "' +
       methodSelect.value + '" to be?:');
 
     if (newName === null || newName === ''){
@@ -153,7 +153,7 @@ function deleteButtonListener(e){
   }
   //if a method is selected, double confirm that all data will be lost.
   else {
-    var areTheySureTheyWantToDelete = confirm('Are you sure you want to delete the method ' + methodSelect.value +
+    let areTheySureTheyWantToDelete = confirm('Are you sure you want to delete the method ' + methodSelect.value +
       ' from the server?  All data relating to this method will be lost.');
     if (areTheySureTheyWantToDelete){
       //make a delete request
@@ -173,7 +173,7 @@ function deleteButtonListener(e){
 //Generic "GET" HTTP Request function
 function getHttpRequest(URL){
   return new Promise((resolve, reject) => {
-    var xmlhttp = new XMLHttpRequest();
+    let xmlhttp = new XMLHttpRequest();
     xmlhttp.open('GET', URL, true);
     xmlhttp.onreadystatechange = function() {
       if (this.readyState == 4 && this.status == 200) {
@@ -189,7 +189,7 @@ function getHttpRequest(URL){
 //generic "POST" sending a JSON encoded object
 function postHttpRequest(URL, object){
   return new Promise((resolve, reject) => {
-    var xmlhttp = new XMLHttpRequest();
+    let xmlhttp = new XMLHttpRequest();
     xmlhttp.open('POST', URL, true);
     xmlhttp.setRequestHeader('Content-Type', 'application/json');
 
@@ -260,9 +260,9 @@ function setTimerBySeconds(totalSeconds){
 }
 
 function addRowToTable (element, index){
-  var newRow = resultsTable.insertRow(index);
-  var nameCell = newRow.insertCell(0);
-  var qtyCell = newRow.insertCell(1);
+  let newRow = resultsTable.insertRow(index);
+  let nameCell = newRow.insertCell(0);
+  let qtyCell = newRow.insertCell(1);
 
   nameCell.innerHTML = element.name;
   qtyCell.innerHTML = element.qty;
@@ -277,12 +277,12 @@ function addRowToTable (element, index){
 ////////  ADD, EDIT, DELETE BUTTONS  //////////
 ///////////////////////////////////////////////
 
-
+//method = {name, username};
 function addMethodRequest(method){
   postHttpRequest('/goldFarm/newmethod', method).then((response) =>{
-    var wasAdded = JSON.parse(response);
+    let wasAdded = JSON.parse(response);
     if (wasAdded){
-      addMethodToSelect(name, methodSelect.length-1);
+      addMethodToSelect(method.name, methodSelect.length);
     }
     else {
       alert ('There was an error adding the method to the server.  Please try again.');
@@ -291,7 +291,7 @@ function addMethodRequest(method){
 }
 
 function addMethodToSelect(name, index){
-  var newOption = document.createElement('option');
+  let newOption = document.createElement('option');
   newOption.value = name;
   newOption.innerHTML = name;
   methodSelect.add(newOption, index);
@@ -299,11 +299,11 @@ function addMethodToSelect(name, index){
 
 
 function editMethodRequest(newName){
-  var methodToEdit = {name: methodSelect.value, newName: newName, username: username};
-  var indexToEdit = methodSelect.selectedIndex;
+  let methodToEdit = {name: methodSelect.value, newName: newName, username: username};
+  let indexToEdit = methodSelect.selectedIndex;
 
   postHttpRequest('/goldFarm/editmethod', methodToEdit).then((response) =>{
-    var wasEdited = JSON.parse(response);
+    let wasEdited = JSON.parse(response);
     if (wasEdited){
       editMethodInSelect(newName, indexToEdit);
     }
@@ -321,11 +321,11 @@ function editMethodInSelect(newName, indexToEdit){
 
 
 function deleteMethodRequest() {
-  var methodToDelete = {name: methodSelect.value, username: username};
-  var methodIndex = methodSelect.selectedIndex;
+  let methodToDelete = {name: methodSelect.value, username: username};
+  let methodIndex = methodSelect.selectedIndex;
 
   postHttpRequest('/goldFarm/deletemethod', methodToDelete).then((response) =>{
-    var wasDeleted = JSON.parse(response);
+    let wasDeleted = JSON.parse(response);
     if (wasDeleted){
       //alert ('The method was successfully deleted');
       deleteMethodFromSelect(methodIndex);
@@ -345,10 +345,10 @@ function deleteMethodFromSelect(index){
 
 
 function receiveMethods(response) {
-  var methods = JSON.parse(response);
+  let methods = JSON.parse(response);
   if (methods.length !== 0){
     //set the selector to include all of the methods
-    for (var i = 0; i < methods.length; i++){
+    for (let i = 0; i < methods.length; i++){
       addMethodToSelect(methods[i].name, i+1);
     }
   }
