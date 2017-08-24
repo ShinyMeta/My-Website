@@ -10,7 +10,7 @@
 
 
 <h1>Gold Farming Calculator</h1>
-<h2>Welcome, {{username}}</h2>
+<h2>Welcome, {{user.username}}</h2>
 <button type = "button" id = "logoutButton">Log Out</button>
 <br>
 <br>
@@ -23,9 +23,14 @@
 <br>
 
 <div id = "saveMethodUI">
+
   <select id = "methodSelect">
     <option value = "default">&#60;Select Gold Farming Method&#62;</option>
+    {{#methods}}
+    <option value = "{{name}}">{{name}}</option>
+    {{/methods}}
   </select>
+
   <button type = "button" id = "addButton">ADD</button>
   <button type = "button" id = "editButton">EDIT</button>
   <button type = "button" id = "deleteButton">DELETE</button>

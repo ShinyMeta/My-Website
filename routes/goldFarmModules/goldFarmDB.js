@@ -105,12 +105,12 @@ DB.getWalletResult = function (user) {
     'SELECT compare.userid, currencylookup.name, compare.currid, compare.startqty, compare.endqty FROM ' +
       '(SELECT end.userid, end.currid, start.qty startqty, end.qty endqty FROM ' +
         'runstartwallet start LEFT OUTER JOIN runendwallet end ' +
-        'ON start.currid = end.currid ' +
+        'ON (start.currid = end.currid AND start.userid = end.userid)' +
         'WHERE start.userid = ' + user.id + ' AND start.qty != end.qty ' +
       'UNION ' +
       'SELECT end.userid, end.currid, start.qty startqty, end.qty endqty FROM ' +
         'runstartwallet start RIGHT OUTER JOIN runendwallet end ' +
-        'ON start.currid = end.currid ' +
+        'ON (start.currid = end.currid AND start.userid = end.userid) ' +
         'WHERE end.userid = ' + user.id + ' AND start.currid IS NULL) compare ' +
     'INNER JOIN currencylookup ' +
     'ON compare.currid = currencylookup.id;';
@@ -140,12 +140,12 @@ DB.getItemsResult = function (user) {
     'SELECT compare.userid, itemlookup.name, compare.itemid, compare.startqty, compare.endqty FROM ' +
       '(SELECT end.userid, end.itemid, start.qty startqty, end.qty endqty FROM ' +
         'runstartitems start LEFT OUTER JOIN runenditems end ' +
-        'ON start.itemid = end.itemid ' +
+        'ON (start.itemid = end.itemid AND start.userid = end.userid)' +
         'WHERE start.userid = ' + user.id + ' AND start.qty != end.qty ' +
       'UNION ' +
       'SELECT end.userid, end.itemid, start.qty startqty, end.qty endqty FROM ' +
         'runstartitems start RIGHT OUTER JOIN runenditems end ' +
-        'ON start.itemid = end.itemid ' +
+        'ON (start.itemid = end.itemid AND start.userid = end.userid)' +
         'WHERE end.userid = ' + user.id + ' AND start.itemid IS NULL) compare ' +
     'INNER JOIN itemlookup ' +
     'ON compare.itemid = itemlookup.id;';

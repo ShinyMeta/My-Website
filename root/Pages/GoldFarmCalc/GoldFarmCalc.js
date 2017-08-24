@@ -1,6 +1,6 @@
 
 
-let username = 'shinymeta';
+// let username = 'shinymeta';
 
 
 
@@ -25,7 +25,9 @@ const resultsTable = document.getElementById('resultsTable');
 ///////////////////////////////////////////
 
 //get all the methods for the current user and update the selector
-getHttpRequest('/goldFarm/methods/' + username).then((result) => { receiveMethods(result) });
+
+
+// getHttpRequest('/goldFarm/methods/').then((result) => { receiveMethods(result) });
 
 
 
@@ -77,7 +79,7 @@ startButton.addEventListener('click', startButtonListener);
 function startButtonListener(e) {
 
   //send start run request and begin timer and stuff
-  let startRunURL ='/goldFarm/startRun?username=' + username;
+  let startRunURL ='/goldFarm/startRun';
 
   getHttpRequest(startRunURL).then((response) => {
     //start timer
@@ -90,7 +92,7 @@ endButton.addEventListener('click', endButtonListener);
 
 function endButtonListener(e) {
   //otherwise, send start run request and begin timer and stuff
-  let endRunURL ='/goldFarm/endRun?username=' + username;
+  let endRunURL ='/goldFarm/endRun';
 
   //response = {
   //  time(in seconds),
@@ -124,7 +126,7 @@ function addButtonListener(e) {
     return;
   }
 
-  let method = {name, username};
+  let method = {name};
   addMethodRequest(method);
 }
 
@@ -134,7 +136,7 @@ editButton.addEventListener('click', editButtonListener);
 
 function editButtonListener(e){
   //if default or add button is selected, alert to select a method
-  if (methodSelect.value == 'default' || methodSelect.value == 'add'){
+  if (methodSelect.value == 'default'){
     alert('You have not selected a method to edit.  Please select a method first.');
   }
   //if a method is selected, prompt for new name.
@@ -312,7 +314,7 @@ function addMethodToSelect(name, index){
 
 
 function editMethodRequest(newName){
-  let methodToEdit = {name: methodSelect.value, newName: newName, username: username};
+  let methodToEdit = {name: methodSelect.value, newName: newName};
   let indexToEdit = methodSelect.selectedIndex;
 
   postHttpRequest('/goldFarm/editmethod', methodToEdit).then((response) =>{
@@ -334,7 +336,7 @@ function editMethodInSelect(newName, indexToEdit){
 
 
 function deleteMethodRequest() {
-  let methodToDelete = {name: methodSelect.value, username: username};
+  let methodToDelete = {name: methodSelect.value};
   let methodIndex = methodSelect.selectedIndex;
 
   postHttpRequest('/goldFarm/deletemethod', methodToDelete).then((response) =>{

@@ -32,7 +32,14 @@ router
   .use(passport.session())
 
   .get('/', (req, res, next) => {
-    res.render('GoldFarmCalc', req.user)
+    let user = req.user
+    DB.getMethod({userid: user.id})
+      .then((methods) => {
+        res.render('GoldFarmCalc', {
+          user,
+          methods
+        })
+      })
   })
 
   .get('/signup', (req, res, next) => {
@@ -65,35 +72,36 @@ router
 
 
 
-  .get('/methods/:username', function (req, res, next) {
-    //console.log('received request to methods');
-    DB.getUser({username: req.params.username})
-      .then((user) => DB.getMethod({userid: user.id}))
-      .then((result) => {
-        res.send(result)
-      })
-      .catch(next);
-  })
+  // .get('/methods/:username', function (req, res, next) {
+  //   //console.log('received request to methods');
+  //   DB.getUser({username: req.params.username})
+  //     .then((user) => DB.getMethod({userid: user.id}))
+  //     .then((result) => {
+  //       res.send(result)
+  //     })
+  //     .catch(next);
+  // })
 
   //expected params: (username)
   .get('/startRun', function (req, res, next) {
-    let user;
-    DB.getUser({username:req.query.username})
-      .then((result) => user = result)
-      .then(() => DB.resetStateTable(user, 'runstart') )
-      .then(() => saveStateTable(user, 'runstart'))
+    DB.resetStateTable(req.user, 'runstart')
+      .then(() => saveStateTable(req.user, 'runstart'))
       .then((result) => { res.send() })
       .catch(next);
+    // let user;
+    // DB.getUser({username:req.user.username})
+    //   .then((result) => user = result)
+    //   .then(() => DB.resetStateTable(user, 'runstart') )
+    //   .then(() => saveStateTable(user, 'runstart'))
+    //   .then((result) => { res.send() })
+    //   .catch(next);
   })
 
   //expected params: (username)
   .get('/endRun', function (req, res, next) {
-    let user;
-    DB.getUser({username: req.query.username})
-      .then((result) => user = result)
-      .then(() => DB.resetStateTable(user, 'runend') )
-      .then(() => saveStateTable(user, 'runend') )
-      .then(() => getRunResultsFromDB(user) )
+    DB.resetStateTable(req.user, 'runend')
+      .then(() => saveStateTable(req.user, 'runend') )
+      .then(() => getRunResultsFromDB(req.user) )
       .then((result) => {
         res.send(result)
       })
@@ -103,13 +111,10 @@ router
   .post('/newmethod', function (req, res, next) {
     //console.log(req.body);
     //add method/return false if method exists
-    DB.getUser({username: req.body.username})
-      .then((user) => {
-        return DB.addMethod({
+    DB.addMethod({
           name: req.body.name,
-          userid: user.id
+          userid: req.user.id
         })
-      })
       .then((result) => {
         //console.log (result);
         res.send(result);
@@ -120,12 +125,9 @@ router
   .post('/deletemethod', function (req, res, next) {
     //console.log(req.body);
     //delete method/return false if method exists
-    DB.getUser({username: req.body.username})
-      .then((user) => {
-        return DB.deleteMethod({
-          name: req.body.name,
-          userid: user.id
-        })
+    DB.deleteMethod({
+        name: req.body.name,
+        userid: req.user.id
       })
       .then((result) => {
         //console.log(result);
@@ -137,14 +139,12 @@ router
   .post('/editmethod', function (req, res, next) {
     //console.log(req.body);
     //delete method/return false if method exists
-    DB.getUser({username: req.body.username})
-      .then((user) => {
-        let method = {
-          name: req.body.name,
-          userid: user.id
-        }
-        return DB.editMethod(method, req.body.newName)
-      })
+
+    let method = {
+      name: req.body.name,
+      userid: req.user.id
+    }
+    DB.editMethod(method, req.body.newName)
       .then((result) => {
         //console.log(result);
         res.send(result);
