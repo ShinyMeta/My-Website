@@ -5,6 +5,8 @@ let username = 'shinymeta';
 
 
 
+const logoutButton = document.getElementById('logoutButton');
+
 const startButton = document.getElementById('startButton');
 const endButton = document.getElementById('endButton');
 const addButton = document.getElementById('addButton');
@@ -58,6 +60,17 @@ function methodSelectListener(e) {
 
 
 //////////////   BUTTON LISTENERS   ////////////////
+
+logoutButton.addEventListener('click', logoutButtonListener);
+
+function logoutButtonListener(e) {
+
+  //send start run request and begin timer and stuff
+  let logoutURL ='/goldFarm/logout';
+  window.location.href = logoutURL
+}
+
+
 
 startButton.addEventListener('click', startButtonListener);
 

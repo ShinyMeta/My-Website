@@ -4,17 +4,29 @@
   "description": "",
   "main": "ExpressServer.js",
   "dependencies": {
+    "bcrypt-nodejs": "0.0.3",
     "body-parser": "^1.15.2",
+    "connect-redis": "^3.3.0",
     "express": "^4.14.0",
-    "mysql": "^2.13.0"
+    "express-session": "^1.15.5",
+    "hjs": "0.0.6",
+    "mysql": "^2.13.0",
+    "passport": "^0.4.0",
+    "passport-local": "^1.0.0"
   },
   "devDependencies": {
-    "nodemon": "^1.11.0"
+    "eslint-plugin-mocha": "^4.11.0",
+    "mocha": "^3.4.2",
+    "nodemon": "^1.11.0",
+    "rewire": "^2.5.2",
+    "sinon": "^2.3.6"
   },
   "scripts": {
-    "dev": "nodemon ExpressServer.js",
-    "start": "node ExpressServer.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "SET NODE_ENV=development&nodemon ExpressServer.js",
+    "start": "SET NODE_ENV=production&node ExpressServer.js",
+    "test": "SET NODE_ENV=development&mocha ./tests/goldFarmTests",
+    "testDB": "SET NODE_ENV=development&mocha ./tests/goldFarmTests/goldFarmDBTest",
+    "testDBall": "SET NODE_ENV=development&mocha ./tests/goldFarmTests/goldFarmDBTest ./tests/goldFarmTests/goldFarmDBInterfaceTest"
   },
   "repository": {
     "type": "git",

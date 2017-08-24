@@ -24,12 +24,15 @@ module.exports = GW2API;
 //     HTTP/API CALL HELPER FUNCTIONS
 ///////////////////////////////////////////
 
-//wrapper for sendig http request, then parsing the response
-
+//wrapper for sending http request, then returning the response string
+function getHttpsRequest(hostname, path) {
+  return sendGetHttpsRequest(hostname, path)
+    .then(getResponseString)
+}
 
 
 //generic httpS requester for API calls
-function getHttpsRequest(hostname, path){
+function sendGetHttpsRequest(hostname, path){
 
   return new Promise((resolve, reject) => {
   //console.log('making request to ' + hostname + path);
@@ -39,28 +42,25 @@ function getHttpsRequest(hostname, path){
       path: path,
       method: 'GET'
     };
-    let req = https.request(options, resolve).on('error', reject);
-    req.end();
+    https.request(options, resolve)
+      .on('error', reject)
+      .end();
   });
 }
 
 //generic parse data
-function parseResponse(response){
+function getResponseString(response){
   return new Promise((resolve, reject) => {
     //start a string to hold the data
     let dataString = '';
-    response.on('data', function(data) {
-      //when I receive a chunk of data in a response
-      dataString += data;
-    }).on('error', function(error) {
-      //in case of an error
-      reject(error);
-      console.error('Error ' + error);
-    }).on('end', function(){
-      //done receiving data and stuff
-      //console.log('finished parsing response');
-      resolve(dataString);
-    })
+    response
+      .on('data', function(data) {
+        dataString += data;
+      })
+      .on('error', reject)
+      .on('end', function(){
+        resolve(dataString);
+      })
   });
 }
 
@@ -75,7 +75,6 @@ GW2API.getWallet = function(user){
   let hostname = API_HOSTNAME;
   let path = WALLET_PATH + '?' + API_KEY_PARAM + user.apikey;
   return getHttpsRequest(hostname, path)
-    .then(parseResponse)
     .then((endData) => JSON.parse(endData))
 }
 
@@ -85,7 +84,6 @@ GW2API.getMats = function(user){
   let hostname = API_HOSTNAME;
   let path = MAT_STORAGE_PATH + '?' + API_KEY_PARAM + user.apikey;
   return getHttpsRequest(hostname, path)
-    .then(parseResponse)
     .then ((endData) => JSON.parse(endData))
 }
 
@@ -95,7 +93,6 @@ GW2API.getBank = function(user){
   let hostname = API_HOSTNAME;
   let path = BANK_PATH + '?' + API_KEY_PARAM + user.apikey;
   return getHttpsRequest(hostname, path)
-    .then(parseResponse)
     .then ((endData) => JSON.parse(endData))
 }
 
@@ -104,7 +101,6 @@ GW2API.getInventories = function(user){
   const hostname = API_HOSTNAME;
   const path = CHARACTERS_PATH + '&' + API_KEY_PARAM + user.apikey;
   return getHttpsRequest(hostname, path)
-    .then(parseResponse)
     .then ((endData) => charactersToInventoryItems(JSON.parse(endData)) )
 }
 
@@ -135,6 +131,5 @@ GW2API.getShared = function(user){
   let hostname = API_HOSTNAME;
   let path = SHARED_PATH + '?' + API_KEY_PARAM + user.apikey;
   return getHttpsRequest(hostname, path)
-    .then(parseResponse)
     .then ((endData) => JSON.parse(endData))
 }

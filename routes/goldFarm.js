@@ -3,6 +3,8 @@
 
 const express = require('express');
 const router = express.Router();
+const passport = require('passport')
+require('./goldFarmModules/passport')
 
 //let https = require('https');
 //let mysql = require('mysql');
@@ -26,68 +28,130 @@ module.exports = router;
 ///////////////////////////////////////////
 
 router
-  .get('/methods/:username', function (req, res) {
+  .use(passport.initialize())
+  .use(passport.session())
+
+  .get('/', (req, res, next) => {
+    res.render('GoldFarmCalc', req.user)
+  })
+
+  .get('/signup', (req, res, next) => {
+    res.render ('signup')
+  })
+  .post('/signup', passport.authenticate('local-register', {
+    successRedirect: '/goldFarm',
+    failureRedirect: '/goldFarm/signup'
+  }))
+
+  .get('/login', (req, res, next) => {
+    //check session for user info
+    if (req.isAuthenticated())
+      res.redirect ('/goldFarm')
+    else
+      res.render('login')
+      //res.redirect ('/Pages/GoldFarmCalc/login.html')
+  })
+  .post('/login', passport.authenticate('local', {
+    successRedirect: '/goldFarm',
+    failureRedirect: '/goldFarm/login'
+  }))
+
+  .get('/logout', (req, res, next) => {
+    req.session.destroy((err) => {
+      res.redirect('/goldfarm/login')
+    })
+  })
+
+
+
+
+  .get('/methods/:username', function (req, res, next) {
     //console.log('received request to methods');
-    DB.getMethods(req.params.username).then((result) => {
-        //console.log(result);
-        res.send(result);
-    });
+    DB.getUser({username: req.params.username})
+      .then((user) => DB.getMethod({userid: user.id}))
+      .then((result) => {
+        res.send(result)
+      })
+      .catch(next);
   })
 
   //expected params: (username)
-  .get('/startRun', function (req, res) {
-
-    let userPromise = DB.getUser(req.query.username);
-    let resetPromise = userPromise.then((user) => { DB.resetStateTable(user, 'runstart')} )
-
-    Promise.all([userPromise, resetPromise])
-      .then(([user, resetSuccess]) => saveStateTable(user, 'runstart'))
-      .then((result) => { res.send() })
-  })
-
-  //expected params: (username)
-  .get('/endRun', function (req, res) {
+  .get('/startRun', function (req, res, next) {
     let user;
-    DB.getUser(req.query.username)
+    DB.getUser({username:req.query.username})
+      .then((result) => user = result)
+      .then(() => DB.resetStateTable(user, 'runstart') )
+      .then(() => saveStateTable(user, 'runstart'))
+      .then((result) => { res.send() })
+      .catch(next);
+  })
+
+  //expected params: (username)
+  .get('/endRun', function (req, res, next) {
+    let user;
+    DB.getUser({username: req.query.username})
       .then((result) => user = result)
       .then(() => DB.resetStateTable(user, 'runend') )
       .then(() => saveStateTable(user, 'runend') )
       .then(() => getRunResultsFromDB(user) )
-      .then((result) => { res.send(result) })
-      //.catch((err) => console.error(err))
+      .then((result) => {
+        res.send(result)
+      })
+      .catch(next);
   })
 
-  .post('/newmethod', function (req, res) {
+  .post('/newmethod', function (req, res, next) {
     //console.log(req.body);
     //add method/return false if method exists
-    DB.addMethod(req.body.name, req.body.username)
+    DB.getUser({username: req.body.username})
+      .then((user) => {
+        return DB.addMethod({
+          name: req.body.name,
+          userid: user.id
+        })
+      })
       .then((result) => {
         //console.log (result);
         res.send(result);
       })
-      .catch((err) => {
-        console.error(err)
+      .catch(next);
+  })
+
+  .post('/deletemethod', function (req, res, next) {
+    //console.log(req.body);
+    //delete method/return false if method exists
+    DB.getUser({username: req.body.username})
+      .then((user) => {
+        return DB.deleteMethod({
+          name: req.body.name,
+          userid: user.id
+        })
       })
+      .then((result) => {
+        //console.log(result);
+        res.send(result);
+      })
+      .catch(next);
   })
 
-  .post('/deletemethod', function (req, res) {
+  .post('/editmethod', function (req, res, next) {
     //console.log(req.body);
     //delete method/return false if method exists
-    DB.deleteMethod(req.body.name, req.body.username).then((result) => {
-      //console.log(result);
-      res.send(result);
-    });
+    DB.getUser({username: req.body.username})
+      .then((user) => {
+        let method = {
+          name: req.body.name,
+          userid: user.id
+        }
+        return DB.editMethod(method, req.body.newName)
+      })
+      .then((result) => {
+        //console.log(result);
+        res.send(result);
+      })
+      .catch(next);
   })
 
-  .post('/editmethod', function (req, res) {
-    //console.log(req.body);
-    //delete method/return false if method exists
-    DB.editMethod(req.body.name, req.body.newName, req.body.username).then((result) => {
-      //console.log(result);
-      res.send(result);
-    });
-  })
-;
 
 
 

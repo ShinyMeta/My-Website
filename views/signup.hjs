@@ -1,0 +1,33 @@
+
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>GW2 Gold Farming Calculator</title>
+</head>
+
+<body>
+
+
+<div id = "signupForm">
+  <form action = "/goldFarm/signup" method = "post">
+    <label>Username:</label>
+    <input type = "text" name = "username"/>
+      <br>
+    <label>Password:</label>
+    <input type = "password" name = "password"/>
+      <br>
+    <label>Confirm Password:</label>
+    <input type = "password" name = "password2"/>
+      <br>
+    <label>APIKey (must have access to wallet and inventories):</label>
+    <input type = "text" name = "apikey"/>
+      <br>
+    <input type = "submit" value = "Signup">
+  </form>
+</div>
+
+<a href = "/goldFarm/login">
+  Back to normal login
+</a>
+
+</body>

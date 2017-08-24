@@ -19,14 +19,16 @@ var items = [];
 
 
 //MySQL connection
-var mysqlConnection = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  password: 'mywebserver',
-  database: 'goldfarmingdatabase'
-});
+var mysqlConnection = require('../routes/goldFarmModules/goldFarmDBInterface.js')
 
-mysqlConnection.connect();
+// var mysqlConnection = mysql.createConnection({
+//   host: 'localhost',
+//   user: 'root',
+//   password: 'mywebserver',
+//   database: 'goldfarmingdatabase'
+// });
+//
+// mysqlConnection.connect();
 
 
 //exporting the module

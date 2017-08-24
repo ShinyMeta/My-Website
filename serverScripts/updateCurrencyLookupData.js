@@ -17,14 +17,16 @@ var currencies = [];
 
 
 //MySQL connection
-var mysqlConnection = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  password: 'mywebserver',
-  database: 'goldfarmingdatabase'
-});
+var mysqlConnection = require('../routes/goldFarmModules/goldFarmDBInterface.js')
 
-mysqlConnection.connect();
+// var mysqlConnection = mysql.createConnection({
+//   host: 'localhost',
+//   user: 'root',
+//   password: 'mywebserver',
+//   database: 'goldfarmingdatabase'
+// });
+//
+// mysqlConnection.connect();
 
 
 //exporting the module
@@ -73,7 +75,7 @@ function getHttpRequest(hostname, path, responseFunction){
 
   var req = http.request(options, responseFunction).on('error', function(e) {
     console.log('problem: ' + e.message);
-    if (e.code == "ECONNRESET"){
+    if (e.code == 'ECONNRESET'){
       //console.log("requeueing request");
       queueRequest('http', hostname, path, responseFunction);
       afterRequestComplete();
@@ -97,7 +99,7 @@ function getHttpsRequest(hostname, path, responseFunction){
 
   var req = https.request(options, responseFunction).on('error', function(e) {
     console.log('problem with request to ' + path + ': ' + e.message);
-    if (e.code == "ECONNRESET"){
+    if (e.code == 'ECONNRESET'){
       //console.log("requeueing request");
       queueRequest('https', hostname, path, responseFunction);
       afterRequestComplete();
