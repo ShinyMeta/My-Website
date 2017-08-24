@@ -38,7 +38,27 @@
 
 <br>
 
-<table id = "resultsTable"></table>
+<p>Double click a row to change the qty</p>
+
+<br>
+
+<table border=1>
+  <thead>
+    <th>Currency ID</th>
+    <th>Currency Name</th>
+    <th>Currency Qty Difference</th>
+  </thead>
+  <tbody id = "currencyTable"></tbody>
+</table>
+
+<table border=1>
+  <thead>
+    <th>Item ID</th>
+    <th>Item Name</th>
+    <th>Item Qty Difference</th>
+  </thead>
+  <tbody id = "itemTable"></tbody>
+</table>
 
 <script src = "/Pages/GoldFarmCalc/GoldFarmCalc.js"> </script>
 

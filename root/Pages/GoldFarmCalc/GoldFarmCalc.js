@@ -1,10 +1,5 @@
 
 
-// let username = 'shinymeta';
-
-
-
-
 const logoutButton = document.getElementById('logoutButton');
 
 const startButton = document.getElementById('startButton');
@@ -17,19 +12,13 @@ const methodSelect = document.getElementById('methodSelect');
 
 const timerDisplay = document.getElementById('timerDisplay');
 
-const resultsTable = document.getElementById('resultsTable');
 
 
 ///////////////////////////////////////////
 //          MAIN SCRIPT
 ///////////////////////////////////////////
 
-//get all the methods for the current user and update the selector
-
-
-// getHttpRequest('/goldFarm/methods/').then((result) => { receiveMethods(result) });
-
-
+let runResult = {}
 
 
 ////////////////////////////////////////////////
@@ -78,6 +67,8 @@ startButton.addEventListener('click', startButtonListener);
 
 function startButtonListener(e) {
 
+  resetRunResults()
+
   //send start run request and begin timer and stuff
   let startRunURL ='/goldFarm/startRun';
 
@@ -91,7 +82,9 @@ function startButtonListener(e) {
 endButton.addEventListener('click', endButtonListener);
 
 function endButtonListener(e) {
-  //otherwise, send start run request and begin timer and stuff
+
+  resetRunResults()
+
   let endRunURL ='/goldFarm/endRun';
 
   //response = {
@@ -109,7 +102,7 @@ function endButtonListener(e) {
   //}
 
   getHttpRequest(endRunURL).then((response) => {
-    let runResult = JSON.parse(response);
+    runResult = JSON.parse(response);
     displayRunToTable (runResult);
   });
 }
@@ -241,13 +234,14 @@ function displayRunToTable (runResult){
 
   setTimerBySeconds(time);
 
-
+  const currencyTable = document.getElementById('currencyTable');
   for (let i = 0; i < wallet.length; i++){
-    addRowToTable(wallet[i], resultsTable.rows.length);
+    addRowToTable(wallet[i], currencyTable);
   }
 
+  const itemTable = document.getElementById('itemTable');
   for (let i = 0; i < items.length; i++){
-    addRowToTable(items[i], resultsTable.rows.length);
+    addRowToTable(items[i], itemTable);
   }
 
   //runResult = {
@@ -274,18 +268,72 @@ function setTimerBySeconds(totalSeconds){
   timerDisplay.innerHTML = `${hours}:${minutes}:${seconds}`;
 }
 
-function addRowToTable (element, index){
-  let newRow = resultsTable.insertRow(index);
-  let nameCell = newRow.insertCell(0);
-  let qtyCell = newRow.insertCell(1);
+function resetRunResults (){
+  runResult = {}
 
+  const currencyTable = document.getElementById('currencyTable');
+  currencyTable.innerHTML = ''
+  const itemTable = document.getElementById('itemTable');
+  itemTable.innerHTML = ''
+}
+
+function addRowToTable (element, table){
+  let newRow = table.insertRow(table.rows.length);
+  let idCell = newRow.insertCell(0);
+  let nameCell = newRow.insertCell(1);
+  let qtyCell = newRow.insertCell(2);
+
+  idCell.innerHTML = element.currid || element.itemid;
   nameCell.innerHTML = element.name;
   qtyCell.innerHTML = element.qty;
+
+  newRow.ondblclick = createEditRowListener(newRow, table)
+}
+
+function createEditRowListener(row, table) {
+
+  return function () {
+    let cells = row.getElementsByTagName('td')
+    //get the qty cell and prompt to change it
+    let qtycell = cells[2]
+
+    let newqty = prompt('What should the quantity be?')
+    if (isInteger(newqty)){
+      //update shit
+      qtycell.innerHTML = newqty
+
+      let idcell = cells[0]
+      if (table.id  == 'currencyTable') {
+        //update teh results.wallet
+        updateRunResult(runResult.wallet, 'currid', idcell.innerHTML, newqty)
+      }
+      else if (table.id  == 'itemTable') {
+        //update teh results.items
+        updateRunResult(runResult.items, 'itemid', idcell.innerHTML, newqty)
+      }
+      else alert('uh oh, shiny fucked up')
+    }
+    else {
+      alert('There was an error. Please try again')
+    }
+  }
 }
 
 
+function updateRunResult(resultarray, idname, id, newqty){
 
+  for (let i = 0; i < resultarray.length; i++) {
+    if (resultarray[i][idname] == id){
+      resultarray[i]['qty'] = parseInt(newqty)
+      return true
+    }
+  }
+  return false
+}
 
+function isInteger(arg){
+  return !(isNaN(arg) || (arg != parseInt(arg, 10)))
+}
 
 
 ///////////////////////////////////////////////
@@ -359,12 +407,12 @@ function deleteMethodFromSelect(index){
 
 
 
-function receiveMethods(response) {
-  let methods = JSON.parse(response);
-  if (methods.length !== 0){
-    //set the selector to include all of the methods
-    for (let i = 0; i < methods.length; i++){
-      addMethodToSelect(methods[i].name, i+1);
-    }
-  }
-}
+// function receiveMethods(response) {
+//   let methods = JSON.parse(response);
+//   if (methods.length !== 0){
+//     //set the selector to include all of the methods
+//     for (let i = 0; i < methods.length; i++){
+//       addMethodToSelect(methods[i].name, i+1);
+//     }
+//   }
+// }

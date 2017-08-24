@@ -32,14 +32,19 @@ router
   .use(passport.session())
 
   .get('/', (req, res, next) => {
-    let user = req.user
-    DB.getMethod({userid: user.id})
-      .then((methods) => {
-        res.render('GoldFarmCalc', {
-          user,
-          methods
+    if (!req.user){
+      res.redirect('/goldFarm/login')
+    }
+    else{
+      let user = req.user
+      DB.getMethod({userid: user.id})
+        .then((methods) => {
+          res.render('GoldFarmCalc', {
+            user,
+            methods
+          })
         })
-      })
+    }
   })
 
   .get('/signup', (req, res, next) => {

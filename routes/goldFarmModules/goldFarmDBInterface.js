@@ -36,6 +36,7 @@ module.exports = {
         //internal function just to avoid code duplication
         function queryCallback(err, result){
           mysqlConnection.release()
+          
           if (err)  reject(err)
           else      resolve(result)
         }

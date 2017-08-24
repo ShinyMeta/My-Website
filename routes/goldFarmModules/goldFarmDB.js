@@ -64,6 +64,7 @@ DB.deleteMethod = function (where){
     .then ((result) => {
       if (result.affectedRows === 0)
         throw new Error('deleteMethod: no records matched specification')
+      return result
     })
 }
 
@@ -122,9 +123,8 @@ DB.getWalletResult = function (user) {
 }
 
 //combine the qtart and end qty of a currency into a single qty
-function currencyQtyDiff({userid, name, currid, startqty, endqty}){
+function currencyQtyDiff({name, currid, startqty, endqty}){
   let newCurrency = {
-    userid,
     name,
     currid
   }
@@ -155,9 +155,8 @@ DB.getItemsResult = function (user) {
 }
 
 //combine the start and end qty of a currency into a single qty
-function itemQtyDiff({userid, name, itemid, startqty, endqty}){
+function itemQtyDiff({name, itemid, startqty, endqty}){
   let newItem = {
-    userid,
     name,
     itemid
   }
