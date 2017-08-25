@@ -106,6 +106,7 @@ GW2API.getInventories = function(user){
 
 //helper function to take the triple nested loop out of context
 function charactersToInventoryItems(characters){
+  console.log (characters)
   let inventoryItems = []
   // i = each character
   for (let i = 0; i < characters.length; i++){

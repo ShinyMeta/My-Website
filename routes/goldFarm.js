@@ -93,13 +93,6 @@ router
       .then(() => saveStateTable(req.user, 'runstart'))
       .then((result) => { res.send() })
       .catch(next);
-    // let user;
-    // DB.getUser({username:req.user.username})
-    //   .then((result) => user = result)
-    //   .then(() => DB.resetStateTable(user, 'runstart') )
-    //   .then(() => saveStateTable(user, 'runstart'))
-    //   .then((result) => { res.send() })
-    //   .catch(next);
   })
 
   //expected params: (username)
@@ -112,6 +105,14 @@ router
       })
       .catch(next);
   })
+
+
+
+
+
+
+
+
 
   .post('/newmethod', function (req, res, next) {
     //console.log(req.body);
