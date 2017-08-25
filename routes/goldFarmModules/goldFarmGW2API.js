@@ -106,13 +106,14 @@ GW2API.getInventories = function(user){
 
 //helper function to take the triple nested loop out of context
 function charactersToInventoryItems(characters){
-  console.log (characters)
+
   let inventoryItems = []
   // i = each character
   for (let i = 0; i < characters.length; i++){
     let bags = characters[i].bags;
     // j = each bag on the character
     for (let j = 0; j < bags.length; j++){
+      console.log (bags[j])
       let inventory = bags[j].inventory;
       // k = each item slot in the bag
       for (let k = 0; k < inventory.length; k++){
