@@ -113,13 +113,14 @@ function charactersToInventoryItems(characters){
     let bags = characters[i].bags;
     // j = each bag on the character
     for (let j = 0; j < bags.length; j++){
-      console.log (bags[j])
-      let inventory = bags[j].inventory;
-      // k = each item slot in the bag
-      for (let k = 0; k < inventory.length; k++){
-        //NOW WE GOT ITEMS YO
-        if (inventory[k] !== null){
-          inventoryItems.push(inventory[k]);
+      if (bags[j] !== null) {
+        let inventory = bags[j].inventory;
+        // k = each item slot in the bag
+        for (let k = 0; k < inventory.length; k++){
+          //NOW WE GOT ITEMS YO
+          if (inventory[k] !== null){
+            inventoryItems.push(inventory[k]);
+          }
         }
       }
     }
