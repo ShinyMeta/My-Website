@@ -61,7 +61,7 @@ app.use('/goldFarm', goldFarm);
 
 
 app.use (function routeNotFound(req, res, next){
-  var err = new Error(req.route + ' Not Found')
+  var err = new Error('Not Found:\n' + JSON.stringify(req))
   err.status = 404;
   next(err)
 })
