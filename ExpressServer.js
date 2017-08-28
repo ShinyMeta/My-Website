@@ -59,6 +59,12 @@ app.use(session({
 var goldFarm = require('./routes/goldFarm');
 app.use('/goldFarm', goldFarm);
 
+//for that asshole that's just trying to POST over and over again
+app.post('/', (req, res, next) => {
+  console.log (`that asshole that keeps POSTing did it again... IP: ${req.ip}`)
+  res.status(403).send('fuck you')
+})
+
 
 app.use (function routeNotFound(req, res, next){
   let message = `Not Found:\nRequest from: ${req.ip}\nhttp info:\n`+
