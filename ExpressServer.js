@@ -64,8 +64,8 @@ app.use (function routeNotFound(req, res, next){
   let message = `Not Found:\nRequest from: ${req.ip}\nhttp info:\n`+
       `method: ${req.method}\nhost: ${req.hostname}\npath: ${req.path}\n`
 
-  if (req.params) message += `params: ${JSON.parse(req.params)}\n`
-  if (req.query) message += `query: ${JSON.parse(req.query)}\n`
+  if (req.params) message += `params: ${JSON.stringify(req.params)}\n`
+  if (req.query) message += `query: ${JSON.stringify(req.query)}\n`
   var err = new Error(message)
 
   err.status = 404;
