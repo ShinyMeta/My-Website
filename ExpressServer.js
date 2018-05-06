@@ -44,27 +44,42 @@ app.use(bodyParser.urlencoded({extended: false}))
 
 //Easy routing for requesting html and images, etc.
 app.set('view engine', 'hjs')
-app.use(express.static('root'));
+app.use(express.static('webpage_src'));
 
-//router for /points/ requests
-var points = require('./routes/points');
-app.use('/points', points);
 
-//router for goldFarm
+//router for gw2data
 app.use(session({
   store: new RedisStore(),
   secret: 'goldFarmSecretz',
   resave: false,
   saveUninitialized: false}))
-var goldFarm = require('./routes/goldFarm');
-app.use('/goldFarm', goldFarm);
+app.use('/gw2data', require('./server_routes/gw2data_route'));
+
+
+
+
+
+
+
+
+
+
+
+
 
 //for that asshole that's just trying to POST over and over again
-app.post('/', (req, res, next) => {
-  console.log (`that asshole that keeps POSTing did it again... IP: ${req.ip}`)
-  res.status(403).send('fuck you')
-})
+// app.post('/', (req, res, next) => {
+//   console.log (`that asshole that keeps POSTing did it again... IP: ${req.ip}`)
+//   res.status(403).send('fuck you')
+// })
 
+
+
+
+
+///////////////////////////////////
+//    ERROR RESPONSES
+///////////////////////////////////
 
 app.use (function routeNotFound(req, res, next){
   let message = `Not Found:\nRequest from: ${req.ip}\nhttp info:\n`+

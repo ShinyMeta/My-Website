@@ -4,13 +4,16 @@
   "description": "",
   "main": "ExpressServer.js",
   "dependencies": {
+    "axios": "^0.18.0",
     "bcrypt-nodejs": "0.0.3",
     "body-parser": "^1.15.2",
     "connect-redis": "^3.3.0",
     "express": "^4.14.0",
     "express-session": "^1.15.5",
     "hjs": "0.0.6",
+    "knex": "^0.14.6",
     "mysql": "^2.13.0",
+    "p-queue": "^2.4.2",
     "passport": "^0.4.0",
     "passport-local": "^1.0.0"
   },
