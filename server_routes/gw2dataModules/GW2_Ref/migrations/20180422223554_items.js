@@ -1,7 +1,7 @@
 
 exports.up = function(knex, Promise) {
   return knex.raw(`
-    CREATE TABLE items (
+    CREATE TABLE ref_items (
       item_id INT UNSIGNED NOT NULL,
       chat_link VARCHAR(45) NOT NULL,
       name VARCHAR(200) NULL,
@@ -19,5 +19,5 @@ exports.up = function(knex, Promise) {
 };
 
 exports.down = function(knex, Promise) {
-  return knex.schema.dropTable("items")
+  return knex.schema.dropTable('ref_items')
 };

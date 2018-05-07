@@ -1,10 +1,10 @@
 
 exports.seed = function(knex, Promise) {
   // Deletes ALL existing entries
-  return knex('itemflags').del()
+  return knex('ref_itemflags').del()
     .then(function () {
       // Inserts seed entries
-      return knex('itemflags').insert([
+      return knex('ref_itemflags').insert([
         {value: 'AccountBindOnUse'},
         {value: 'AccountBound'},
         {value: 'Attuned'},

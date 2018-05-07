@@ -1,10 +1,10 @@
 
 exports.seed = function(knex, Promise) {
   // Deletes ALL existing entries
-  return knex('itemrestrictions').del()
+  return knex('ref_itemrestrictions').del()
     .then(function () {
       // Inserts seed entries
-      return knex('itemrestrictions').insert([
+      return knex('ref_itemrestrictions').insert([
         {value: 'Asura'},
         {value: 'Charr'},
         {value: 'Human'},

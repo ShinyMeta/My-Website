@@ -1,7 +1,7 @@
 
 exports.up = function(knex, Promise) {
   return knex.raw(`
-    CREATE TABLE currencies (
+    CREATE TABLE ref_currencies (
       currency_id INT UNSIGNED NOT NULL,
       name VARCHAR(100) NOT NULL,
       description VARCHAR(500) NULL,
@@ -13,5 +13,5 @@ exports.up = function(knex, Promise) {
 };
 
 exports.down = function(knex, Promise) {
-  return knex.schema.dropTable('currencies')
+  return knex.schema.dropTable('ref_currencies')
 };

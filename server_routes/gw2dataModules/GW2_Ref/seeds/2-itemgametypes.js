@@ -1,10 +1,10 @@
 
 exports.seed = function(knex, Promise) {
   // Deletes ALL existing entries
-  return knex('itemgametypes').del()
+  return knex('ref_itemgametypes').del()
     .then(function () {
       // Inserts seed entries
-      return knex('itemgametypes').insert([
+      return knex('ref_itemgametypes').insert([
         {value: 'Activity'},
         {value: 'Dungeon'},
         {value: 'Pve'},

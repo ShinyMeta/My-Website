@@ -1,7 +1,7 @@
 
 exports.up = function(knex, Promise) {
   return knex.raw(`
-    CREATE TABLE items_itemgametypes (
+    CREATE TABLE ref_items_itemgametypes (
       pair_id INT UNSIGNED NOT NULL AUTO_INCREMENT,
       item_id INT UNSIGNED NOT NULL,
       Itemgametype_id INT UNSIGNED NOT NULL,
@@ -11,5 +11,5 @@ exports.up = function(knex, Promise) {
 };
 
 exports.down = function(knex, Promise) {
-  return knex.schema.dropTable('items_itemgametypes')
+  return knex.schema.dropTable('ref_items_itemgametypes')
 };

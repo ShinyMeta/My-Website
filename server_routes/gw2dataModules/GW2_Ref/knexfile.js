@@ -7,7 +7,7 @@ module.exports = {
       host: '127.0.0.1',
       user: 'root',
       password: 'mywebserver',
-      database: 'gw2_ref_dev'
+      database: 'gw2_tools_dev'
     }
   },
 
@@ -17,7 +17,7 @@ module.exports = {
       host: '127.0.0.1',
       user: 'root',
       password: 'mywebserver',
-      database: 'gw2_ref'
+      database: 'gw2_tools_prod'
     }
   }
 }

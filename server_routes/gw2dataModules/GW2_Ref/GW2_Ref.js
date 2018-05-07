@@ -110,11 +110,11 @@ module.exports.updateRefTables = function() {
   RESTRICTION_INDEXER = {}
 
   return Promise.all([
-    gw2_ref_DB('currencies').truncate(),
-    gw2_ref_DB('items').truncate(),
-    gw2_ref_DB('items_itemflags').truncate(),
-    gw2_ref_DB('items_itemgametypes').truncate(),
-    gw2_ref_DB('items_itemrestrictions').truncate()
+    gw2_ref_DB('ref_currencies').truncate(),
+    gw2_ref_DB('ref_items').truncate(),
+    gw2_ref_DB('ref_items_itemflags').truncate(),
+    gw2_ref_DB('ref_items_itemgametypes').truncate(),
+    gw2_ref_DB('ref_items_itemrestrictions').truncate()
 
   //then load the tag tables from database into the indexers
   ]).then(() => {
@@ -202,11 +202,11 @@ module.exports.updateRefTables = function() {
 function loadTagCaches() {
   //flags, gametypes and restrictions
   return Promise.all([
-    gw2_ref_DB('itemflags').then((flags) => {
+    gw2_ref_DB('ref_itemflags').then((flags) => {
       createIndexerFromArrayOfPairs(flags, 'itemflag_id', 'value', FLAG_INDEXER)}),
-    gw2_ref_DB('itemgametypes').then((gametypes) => {
+    gw2_ref_DB('ref_itemgametypes').then((gametypes) => {
       createIndexerFromArrayOfPairs(gametypes, 'itemgametype_id', 'value', GAMETYPE_INDEXER)}),
-    gw2_ref_DB('itemrestrictions').then((restrictions) => {
+    gw2_ref_DB('ref_itemrestrictions').then((restrictions) => {
       createIndexerFromArrayOfPairs(restrictions, 'itemrestriction_id', 'value', RESTRICTION_INDEXER)})
   ])
 }
@@ -405,13 +405,13 @@ function currenciesResponseHandler(response) {
 // converts item and fully inserts in DB, returns promise for full completion
 function insertItemToDB(item) {
   return Promise.all([
-    gw2_ref_DB('items')
+    gw2_ref_DB('ref_items')
       .insert(castItemForDB(item)),
-    gw2_ref_DB('items_itemflags')
+    gw2_ref_DB('ref_items_itemflags')
       .insert(castTagArrayForDB(item, 'flags', 'itemflag_id', FLAG_INDEXER)),
-    gw2_ref_DB('items_itemgametypes')
+    gw2_ref_DB('ref_items_itemgametypes')
       .insert(castTagArrayForDB(item, 'game_types', 'itemgametype_id', GAMETYPE_INDEXER)),
-    gw2_ref_DB('items_itemrestrictions')
+    gw2_ref_DB('ref_items_itemrestrictions')
       .insert(castTagArrayForDB(item, 'restrictions', 'itemrestriction_id', RESTRICTION_INDEXER))
   ]).then (() => {})
 }
@@ -442,8 +442,8 @@ function castItemForDB({id, chat_link, name, icon, description, type, rarity,
 //    tagDBName is the column label in DB
 //    indexer is the INDEXER object to translate tags to their DB IDs
 function castTagArrayForDB(item, tagArrayName, tagDBName, indexer) {
-  result = []
-  array = item[tagArrayName]
+  let result = []
+  let array = item[tagArrayName]
   if (array && array.length > 0){
     array.forEach((value) => {
       let next = {item_id: item.id}
@@ -458,7 +458,7 @@ function castTagArrayForDB(item, tagArrayName, tagDBName, indexer) {
 
 
 function insertCurrencyToDB(currency) {
-  return gw2_ref_DB('currencies')
+  return gw2_ref_DB('ref_currencies')
     .insert(castCurrencyForDB(currency))
 }
 

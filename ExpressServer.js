@@ -4,12 +4,27 @@
 //node ExpressServer.js
 
 var bodyParser = require('body-parser');
-var express = require('express');
 const session = require('express-session')
 const RedisStore = require('connect-redis')(session)
 
 //app is for controlling the server
-var app = express();
+const fs = require('fs')
+const http = require('http')
+const https = require('https')
+const express = require('express')
+
+const privateKey = fs.readFileSync('C:/SSL/private.key')
+const certificate = fs.readFileSync('C:/SSL/certificate.crt')
+const credentials = {key: privateKey, cert: certificate}
+
+let app = express()
+
+let httpServer = http.createServer(app)
+
+let httpsServer = https.createServer(credentials, app)
+
+
+
 
 
 ///////////////////////////////////////////////
@@ -110,6 +125,10 @@ app.use (function errorHandler(err, req, res, next){
 
 
 //this starts the server
-app.listen(80, function () {
-  console.log('Example app listening on port 80!');
-});
+httpServer.listen(80, () => {
+  console.log('http listening on port 80')
+})
+
+httpsServer.listen(443, () => {
+  console.log('https listening on port 443')
+})
