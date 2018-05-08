@@ -53,6 +53,14 @@ app.set('view engine', 'hjs')
   .use(express.static('webpage_src'))
 
 
+//redirect non-https traffic to secure connection
+app.use(function(req, res, next) {
+  if(!req.secure) {
+    return res.redirect(['https://', req.get('Host'), req.url].join(''));
+  }
+  next();
+});
+
 
 //router for gw2data
 app.use('/gw2data', require('./server_routes/gw2data_route'))
