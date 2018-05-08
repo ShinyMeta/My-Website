@@ -1,0 +1,13 @@
+
+*.user   (tables with data specific to users)
+  _account_info (username, passwords, email, apikey)
+
+*.ref     (reference tables with static data from gw2 API)
+  _items
+  _currencies
+  _itemflags
+  _itemgametypes
+  _itemrestrictions
+  _items_itemflags
+  _items_itemgametypes
+  _items_itemrestrictions

@@ -3,10 +3,12 @@
 
 const express = require('express');
 const router = express.Router();
-// const passport = require('passport')
-// require('./gw2dataModules/passport')
+const session = require('express-session')
+const passport = require('passport')
+    require('./gw2_tools_db/passport.js')
+const RedisStore = require('connect-redis')(session)
 
-let GW2_REF = require('./gw2dataModules/GW2_Ref/GW2_Ref.js')
+let DB = require('./gw2_tools_db/gw2_tools_db.js')
 
 
 module.exports = router;
@@ -22,30 +24,60 @@ module.exports = router;
 ///////////////////////////////////////////
 
 router
-  // .use(passport.initialize())
-  // .use(passport.session())
+  //session setup for maintained logins
+  //this adds req.session to the incoming req object
+  //anything that I add to the session object will be remembered until deleted
+  .use(session({
+    store: new RedisStore(), //this will store those sessions in redis database
+    secret: 'goldFarmSecretz',
+    resave: false,
+    saveUninitialized: false}))
+  .use(passport.initialize()) //will look for user on req
+  .use(passport.session()) //stores the serialized user to session
+
+
+
+
 
   .get('/', (req, res, next) => {
-    // if (!req.user){
-    //   res.redirect('/gw2data/login')
-    // }
-    // else{
-    //   let user = req.user
-    //   DB.getMethod({userid: user.id})
-    //     .then((methods) => {
-          res.render('gw2data'/*, {
-            user,
-            methods
-          }*/)
-    //     })
-    // }
+    if (!req.user){
+      res.redirect('/gw2data/login')
+    }
+    else{
+      res.render('gw2data', {user: req.user})
+    }
   })
+  .get('/login', (req, res, next) => {
+    res.render('login')
+  })
+  .post('/login', passport.authenticate('local', {
+    successRedirect: '/gw2data',
+    failureRedirect: '/gw2data/login'
+  }))
+  .get('/logout', (req, res, next) => {
+    req.session.destroy((err) => {
+      res.redirect('/gw2data/login')
+    })
+  })
+  .get('/signup', (req, res, next) => {
+    res.render('signup')
+  })
+  .post('/signup', passport.authenticate('local-register', {
+    successRedirect: '/gw2data',
+    failureRedirect: '/gw2data/signup'
+  }))
+
+
+
+
+
+
   .get('/gw2refUpdate', (req, res, next) => {
     res.render('gw2refUpdate')
   })
   .post('/gw2refUpdate', (req, res, next) => {
     // call the update function
-    GW2_REF.updateRefTables()
+    DB.updateRefTables()
       .then(() => {
         res.sendStatus(200)
       })

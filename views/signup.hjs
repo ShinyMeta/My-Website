@@ -9,7 +9,7 @@
 
 
 <div id = "signupForm">
-  <form action = "/goldFarm/signup" method = "post">
+  <form action = "/gw2data/signup" method = "post">
     <label>Username:</label>
     <input type = "text" name = "username"/>
       <br>
@@ -19,6 +19,9 @@
     <label>Confirm Password:</label>
     <input type = "password" name = "password2"/>
       <br>
+    <label>Email:</label>
+    <input type = "text" name = "email"/>
+      <br>
     <label>APIKey (must have access to wallet and inventories):</label>
     <input type = "text" name = "apikey"/>
       <br>
@@ -26,7 +29,7 @@
   </form>
 </div>
 
-<a href = "/goldFarm/login">
+<a href = "/gw2data/login">
   Back to normal login
 </a>
 

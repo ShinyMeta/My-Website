@@ -4,14 +4,18 @@
   <meta charset="utf-8" />
   <title>GW2 Data Recorder</title>
   <link type="text/css"; rel = "stylesheet"; href = "../CSS/gw2data.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 </head>
 
 <body>
 
 
 <h1>GW2 Data Recorder</h1>
-<!-- <h2>Welcome, {{user.username}}</h2> -->
-<button type = "button" id = "logoutButton">Log Out</button>
+<h2>Welcome, {{user.username}}</h2>
+<a href="/gw2data/logout">Log Out</a>
+<br>
+<br>
+<br>
 <a href="/gw2data/gw2refUpdate"> Click here for updating the gw2 ref </a>
 
 

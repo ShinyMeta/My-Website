@@ -1,26 +1,21 @@
 
-//run server command:
-//cd My Documents/Atom Projects/My Webpage/
-//node ExpressServer.js
 
-var bodyParser = require('body-parser');
-const session = require('express-session')
-const RedisStore = require('connect-redis')(session)
 
-//app is for controlling the server
 const fs = require('fs')
 const http = require('http')
 const https = require('https')
 const express = require('express')
 
+const bodyParser = require('body-parser');
+
+
+//app is for controlling the server
+let app = express()
+let httpServer = http.createServer(app)
+
 const privateKey = fs.readFileSync('C:/SSL/private.key')
 const certificate = fs.readFileSync('C:/SSL/certificate.crt')
 const credentials = {key: privateKey, cert: certificate}
-
-let app = express()
-
-let httpServer = http.createServer(app)
-
 let httpsServer = https.createServer(credentials, app)
 
 
@@ -33,11 +28,7 @@ let httpsServer = https.createServer(credentials, app)
 
 
 
-// var updateItemLookupData = require('./serverFunctions/updateItemLookupData.js');
-// updateItemLookupData();
 
-//var updateCurrencyLookupData = require('./serverFunctions/updateCurrencyLookupData.js');
-//updateCurrencyLookupData();
 
 //////////////////////////////////////////////
 //////////////////////////////////////////////
@@ -54,21 +45,17 @@ let httpsServer = https.createServer(credentials, app)
 
 //http requests with content type application/json will be parsed
 //req.body will be changed to a json object
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({extended: false}))
+app.use(bodyParser.json())
+  .use(bodyParser.urlencoded({extended: false}))
 
 //Easy routing for requesting html and images, etc.
 app.set('view engine', 'hjs')
-app.use(express.static('webpage_src'));
+  .use(express.static('webpage_src'))
+
 
 
 //router for gw2data
-app.use(session({
-  store: new RedisStore(),
-  secret: 'goldFarmSecretz',
-  resave: false,
-  saveUninitialized: false}))
-app.use('/gw2data', require('./server_routes/gw2data_route'));
+app.use('/gw2data', require('./server_routes/gw2data_route'))
 
 
 

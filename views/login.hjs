@@ -12,7 +12,7 @@
 <div id = "loginForm">
   <span>Please login to start</span>
 
-  <form action = "/goldFarm/login" method = "post">
+  <form action = "/gw2data/login" method = "post">
     <label>Username:</label>
     <input type = "text" name = "username"/>
       <br>
@@ -23,7 +23,7 @@
   </form>
 </div>
 
-<a href = "/goldFarm/signup">
+<a href = "/gw2data/signup">
   Click here to signup
 </a>
 

@@ -32,7 +32,7 @@ const MAX_CONCURR_DB_INSERTS = 1000
 //////////////////////////////////
 
 
-const gw2_ref_DB = knex(knex_config)
+const gw2_tools_db = knex(knex_config)
 
 const gw2_API_v2 = axios.create({
   baseURL: 'http://api.guildwars2.com/v2',
@@ -51,45 +51,7 @@ const gw2_ref_DB_queue = new PQueue({concurrency: MAX_CONCURR_DB_INSERTS})
 let FLAG_INDEXER = {}, GAMETYPE_INDEXER = {}, RESTRICTION_INDEXER = {}
 
 
-
-// item example = {
-//   name: "MONSTER ONLY Moa Unarmed Pet",
-//   type: "Weapon",
-//   level: 0,
-//   rarity: "Fine",
-//   vendor_value: 0,
-//   default_skin: 3265,
-//   game_types: [
-//     "Activity",
-//     "Wvw",
-//     "Dungeon",
-//     "Pve"
-//   ],
-//   flags: [
-//     "NoSell",
-//     "SoulbindOnAcquire",
-//     "SoulBindOnUse"
-//   ],
-//   restrictions: [ ],
-//   id: 1,
-//   chat_link: "[&AgEBAAAA]",
-//   icon: "https://render.guildwars2.com/file/4AECE5EA59CA057F4C53E1EDFE95E0E3E61DE37F/60980.png",
-//   details: {
-//     type: "Staff",
-//     damage_type: "Physical",
-//     min_power: 146,
-//     max_power: 165,
-//     defense: 0,
-//     infusion_slots: [ ],
-//     infix_upgrade: {
-//       id: 112,
-//       attributes: [ ]
-//     },
-//     secondary_suffix_item_id: ""
-//   }
-// }
-
-module.exports = gw2_ref_DB
+module.exports = gw2_tools_db
 
 
 ////////////////////////////////////////////
@@ -110,11 +72,11 @@ module.exports.updateRefTables = function() {
   RESTRICTION_INDEXER = {}
 
   return Promise.all([
-    gw2_ref_DB('ref_currencies').truncate(),
-    gw2_ref_DB('ref_items').truncate(),
-    gw2_ref_DB('ref_items_itemflags').truncate(),
-    gw2_ref_DB('ref_items_itemgametypes').truncate(),
-    gw2_ref_DB('ref_items_itemrestrictions').truncate()
+    gw2_tools_db('ref_currencies').truncate(),
+    gw2_tools_db('ref_items').truncate(),
+    gw2_tools_db('ref_items_itemflags').truncate(),
+    gw2_tools_db('ref_items_itemgametypes').truncate(),
+    gw2_tools_db('ref_items_itemrestrictions').truncate()
 
   //then load the tag tables from database into the indexers
   ]).then(() => {
@@ -202,11 +164,11 @@ module.exports.updateRefTables = function() {
 function loadTagCaches() {
   //flags, gametypes and restrictions
   return Promise.all([
-    gw2_ref_DB('ref_itemflags').then((flags) => {
+    gw2_tools_db('ref_itemflags').then((flags) => {
       createIndexerFromArrayOfPairs(flags, 'itemflag_id', 'value', FLAG_INDEXER)}),
-    gw2_ref_DB('ref_itemgametypes').then((gametypes) => {
+    gw2_tools_db('ref_itemgametypes').then((gametypes) => {
       createIndexerFromArrayOfPairs(gametypes, 'itemgametype_id', 'value', GAMETYPE_INDEXER)}),
-    gw2_ref_DB('ref_itemrestrictions').then((restrictions) => {
+    gw2_tools_db('ref_itemrestrictions').then((restrictions) => {
       createIndexerFromArrayOfPairs(restrictions, 'itemrestriction_id', 'value', RESTRICTION_INDEXER)})
   ])
 }
@@ -405,13 +367,13 @@ function currenciesResponseHandler(response) {
 // converts item and fully inserts in DB, returns promise for full completion
 function insertItemToDB(item) {
   return Promise.all([
-    gw2_ref_DB('ref_items')
+    gw2_tools_db('ref_items')
       .insert(castItemForDB(item)),
-    gw2_ref_DB('ref_items_itemflags')
+    gw2_tools_db('ref_items_itemflags')
       .insert(castTagArrayForDB(item, 'flags', 'itemflag_id', FLAG_INDEXER)),
-    gw2_ref_DB('ref_items_itemgametypes')
+    gw2_tools_db('ref_items_itemgametypes')
       .insert(castTagArrayForDB(item, 'game_types', 'itemgametype_id', GAMETYPE_INDEXER)),
-    gw2_ref_DB('ref_items_itemrestrictions')
+    gw2_tools_db('ref_items_itemrestrictions')
       .insert(castTagArrayForDB(item, 'restrictions', 'itemrestriction_id', RESTRICTION_INDEXER))
   ]).then (() => {})
 }
@@ -458,7 +420,7 @@ function castTagArrayForDB(item, tagArrayName, tagDBName, indexer) {
 
 
 function insertCurrencyToDB(currency) {
-  return gw2_ref_DB('ref_currencies')
+  return gw2_tools_db('ref_currencies')
     .insert(castCurrencyForDB(currency))
 }
 
