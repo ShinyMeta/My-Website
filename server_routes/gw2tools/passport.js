@@ -3,7 +3,7 @@ const bcrypt = require('bcrypt-nodejs')
 const passport = require('passport')
 const LocalStrategy = require('passport-local').Strategy
 
-const DB = require('./gw2_tools_db')
+const DB = require('./gw2DB')
 
 
 //strategy gives you access to 'req.isAuthenticated()'

@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <title>GW2 Gold Farming Calculator</title>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 </head>
 
 <body>
@@ -11,26 +12,36 @@
 <div id = "signupForm">
   <form action = "/gw2data/signup" method = "post">
     <label>Username:</label>
-    <input type = "text" name = "username"/>
+    <input type = "text" name = "username" required/>
       <br>
     <label>Password:</label>
-    <input type = "password" name = "password"/>
+    <input type = "password" name = "password" id = "password" required/>
       <br>
     <label>Confirm Password:</label>
-    <input type = "password" name = "password2"/>
+    <input type = "password" name = "password2" id = "password2" required/>
+    <label id = "passwordMatchMessage"></label>
       <br>
     <label>Email:</label>
-    <input type = "text" name = "email"/>
+    <input type = "text" name = "email" required/>
       <br>
-    <label>APIKey (must have access to wallet and inventories):</label>
-    <input type = "text" name = "apikey"/>
+    <label>APIKey:</label>
+    <input type = "text" name = "apikey" id = "apikey" required/>
+    <label><a href="https://account.arena.net/applications" target = "_blank">
+      (Must have access to 'wallet' and 'inventories')</a></label>
       <br>
-    <input type = "submit" value = "Signup">
+    <button type = "button" id = "verifyAPIKeyButton">Verify API Key</button>
+    <label id = "apikeyVerifiedMessage"></label>
+      <br>
+    <input type = "submit" value = "Signup" id = "signupButton"
+        title = "You must fill out form completely and
+verify API key before submitting" style = "pointer-events: auto" disabled>
   </form>
 </div>
+
+
 
 <a href = "/gw2data/login">
   Back to normal login
 </a>
-
+<script src = "../JS/signup.js"></script>
 </body>

@@ -5,10 +5,10 @@ const express = require('express');
 const router = express.Router();
 const session = require('express-session')
 const passport = require('passport')
-    require('./gw2_tools_db/passport.js')
+    require('./gw2tools/passport.js')
 const RedisStore = require('connect-redis')(session)
 
-let DB = require('./gw2_tools_db/gw2_tools_db.js')
+let DB = require('./gw2tools/gw2DB.js')
 
 
 module.exports = router;
