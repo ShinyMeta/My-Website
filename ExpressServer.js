@@ -6,7 +6,8 @@ const http = require('http')
 const https = require('https')
 const express = require('express')
 
-const bodyParser = require('body-parser');
+const bodyParser = require('body-parser')
+const helmet = require('helmet')
 
 
 //app is for controlling the server
@@ -47,6 +48,9 @@ let httpsServer = https.createServer(credentials, app)
 //req.body will be changed to a json object
 app.use(bodyParser.json())
   .use(bodyParser.urlencoded({extended: false}))
+
+// tells the browser to use https if they are on http
+app.use(helmet())
 
 //Easy routing for requesting html and images, etc.
 app.set('view engine', 'hjs')
