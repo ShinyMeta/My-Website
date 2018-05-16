@@ -35,7 +35,7 @@ const MAX_CONCURR_DB_INSERTS = 1000
 const gw2DB = knex(knex_config)
 
 const gw2API = axios.create({
-  baseURL: 'http://api.guildwars2.com/v2',
+  baseURL: 'https://api.guildwars2.com/v2',
   timeout: API_TIMEOUT_IN_MS
 })
 

@@ -33,48 +33,38 @@ router
     resave: false,
     saveUninitialized: false}))
   .use(passport.initialize()) //will look for user on req
-  .use(passport.session()) //stores the serialized user to session
+  .use(passport.session()) //stores the serialized user to session (req.user)
 
 
 
+  //used to check if user is logged in
+  .get('/user', (req, res, next) => {
+    console.log('request for user, returning: ' + JSON.stringify(req.user))
+    if (req.user) res.json(req.user)
+    else res.json(null)
+  })
 
-
-  .get('/', (req, res, next) => {
-    if (!req.user){
-      res.redirect('/gw2data/login')
+  .post('/login', passport.authenticate('local'), (req, res) => {
+    //if autehenticated, will return user:
+    res.json(req.user)
+  })
+  .post('/logout', (req, res, next) => {
+    if (req.user){
+      req.session.destroy((err) => {
+        if (err) return next(err)
+        res.sendStatus(200)
+      })
+    } else {
+      res.sendStatus(200)
     }
-    else{
-      res.render('gw2data', {user: req.user})
-    }
   })
-  .get('/login', (req, res, next) => {
-    res.render('login')
+  .post('/signup', passport.authenticate('local-register'), (req, res) => {
+    //if successful return user
+    res.json(req.user)
   })
-  .post('/login', passport.authenticate('local', {
-    successRedirect: '/gw2data',
-    failureRedirect: '/gw2data/login'
-  }))
-  .get('/logout', (req, res, next) => {
-    req.session.destroy((err) => {
-      res.redirect('/gw2data/login')
-    })
-  })
-  .get('/signup', (req, res, next) => {
-    res.render('signup')
-  })
-  .post('/signup', passport.authenticate('local-register', {
-    successRedirect: '/gw2data',
-    failureRedirect: '/gw2data/signup'
-  }))
 
 
 
-
-
-
-  .get('/gw2refUpdate', (req, res, next) => {
-    res.render('gw2refUpdate')
-  })
   .post('/gw2refUpdate', (req, res, next) => {
     // call the update function
     DB.updateRefTables()
