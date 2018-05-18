@@ -18,10 +18,11 @@ export default class SignupForm extends React.Component {
       password2: '',
       email: '',
       apikey: '',
-      passwordMatch: false,
+      passwordMatch: null,
       passwordMessage: '',
       apikeyVerified: false,
       apikeyMessage: '',
+      submitErrorMessage: ''
     }
   }
 
@@ -50,6 +51,11 @@ export default class SignupForm extends React.Component {
       this.props.setUser(user)
     })
     .catch((err) => {
+      if (err.response && err.response.status === 401) {
+        //display error message
+        const submitErrorMessage = err.response.data
+        this.setState({submitErrorMessage})
+      }
       //display error message
       console.error(err)
     })
@@ -145,6 +151,7 @@ export default class SignupForm extends React.Component {
               title = "You must fill out form completely and
       verify API key before submitting" style = {{pointerEvents: 'auto'}}
               disabled = {!this.state.passwordMatch | !this.state.apikeyVerified}/>
+          <label style = {{color: 'red'}}>{this.state.submitErrorMessage}</label>
         </form>
       </div>
     )

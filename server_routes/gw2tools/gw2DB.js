@@ -54,17 +54,126 @@ let FLAG_INDEXER = {}, GAMETYPE_INDEXER = {}, RESTRICTION_INDEXER = {}
 module.exports = gw2DB
 
 
+
+gw2DB.getItemDetails = (ids) => {
+
+  //single ID
+  if (!Array.isArray(ids)){
+    let item = {}
+    return Promise.all([
+      gw2DB('items')
+        .where('item_id', ids)
+        .first(),
+      gw2DB.select('value').from('items_itemflags AS a')
+        .innerJoin('itemflags AS b', 'a.item_id', 'b.item_id')
+        .where('item_id', ids)
+        .then((results) => { return {flags: results.map(x => x.value)} }),
+      gw2DB.select('value').from('items_itemgametypes AS a')
+        .innerJoin('itemgametypes AS b', 'a.item_id', 'b.item_id')
+        .where('item_id', ids)
+        .then((results) => { return {gametypes: results.map(x => x.value)} }),
+      gw2DB.select('value').from('items_itemrestrictions AS a')
+        .innerJoin('itemrestrictions AS b', 'a.item_id', 'b.item_id')
+        .where('item_id', ids)
+        .then((results) => { return {restrictions: results.map(x => x.value)} })
+    ])
+    .then((results) => {
+      Object.assign(item, results[0],results[1],results[2],results[3])
+      return item
+    })
+  }
+
+  //array of ids
+  return Promise.all([
+    gw2DB('items')
+      .where('item_id', ids)
+      .then((items) => {
+        //turn this list of items into an associative array item, by id
+        let result = {}
+        items.forEach((item) => { result[item.item_id] = item })
+        return result
+      }),
+
+    gw2DB.select('item_id', 'value').from('items_itemflags AS a')
+      .innerJoin('itemflags AS b', 'a.item_id', 'b.item_id')
+      .whereIn('item_id', ids),
+
+    gw2DB.select('item_id', 'value').from('items_itemgametypes AS a')
+      .innerJoin('itemgametypes AS b', 'a.item_id', 'b.item_id')
+      .whereIn('item_id', ids),
+
+    gw2DB.select('item_id', 'value').from('items_itemrestrictions AS a')
+      .innerJoin('itemrestrictions AS b', 'a.item_id', 'b.item_id')
+      .whereIn('item_id', ids)
+  ])
+  .then((results) => {
+    //need to put flags, gametypes and restrictions into their items
+
+  })
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ////////////////////////////////////////////
 ////////////////////////////////////////////
 ////////////////////////////////////////////
-//  UPDATE FUNCTION
+//  UPDATE LOOKUP TABLES FUNCTIONS
 ////////////////////////////////////////////
 ////////////////////////////////////////////
 ////////////////////////////////////////////
 
 
 
-module.exports.updateRefTables = function() {
+gw2DB.updateRefTables = function() {
 
   //first truncate the item tables and reset indexers
   FLAG_INDEXER = {}
@@ -110,48 +219,6 @@ module.exports.updateRefTables = function() {
 
 
 
-////////////////////////////////////////////
-////////////////////////////////////////////
-////////////////////////////////////////////
-//  END OF UPDATE FUNCTION
-////////////////////////////////////////////
-////////////////////////////////////////////
-////////////////////////////////////////////
-
-
-// module.exports.updateRefTables()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -180,29 +247,6 @@ function createIndexerFromArrayOfPairs(arrayOfPairs, nameOfVarX, nameOfVarY, ind
     indexer[pair[nameOfVarY]] = pair[nameOfVarX]
   })
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -327,37 +371,6 @@ function currenciesResponseHandler(response) {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 //////////////////////////////////////////////
 //            INSERT TO DB
 //////////////////////////////////////////////
@@ -434,3 +447,14 @@ function castCurrencyForDB({id, name, description, order, icon}) {
   }
   return currency
 }
+
+
+
+
+////////////////////////////////////////////
+////////////////////////////////////////////
+////////////////////////////////////////////
+//  END OF UPDATE FUNCTION
+////////////////////////////////////////////
+////////////////////////////////////////////
+////////////////////////////////////////////

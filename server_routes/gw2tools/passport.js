@@ -35,14 +35,16 @@ function authenticate(username, password, done) {
 function register(req, username, password, done) {
   DB('user_account_info')
     .where('username', username)
+    .orWhere('email', req.body.email)
     .first()
     .then((existingUser) => {
-      if (existingUser) {
-        return done(null, false, {message: 'someone already has that username'})
+      if (existingUser && existingUser.username === username) {
+        return done(null, false, {message: 'That username is already in use'})
       }
-      if (password !== req.body.password2) {
-        return done(null, false, {message: 'passwords do not match'})
+      if (existingUser && existingUser.email === req.body.email) {
+        return done(null, false, {message: 'That email is already in use'})
       }
+
       //if form filled correctly, add to DB
       const new_user = {
         username,
@@ -63,6 +65,7 @@ function register(req, username, password, done) {
 
 
     })
+    .catch(done)
 }
 
 

@@ -74,9 +74,15 @@ gw2API.bank = (access_token) => {
   return gw2API.get('/account/bank', {params: {access_token}})
 }
 
-gw2API.characters = (access_token) => {
+gw2API.characters = (access_token, requestDetails) => {
   // https://api.guildwars2.com/v2/characters?access_token=D2B5389F-F40A-4547-9D2C-FAC66DACEB63374FC165-8917-4A24-9DB0-74602CBF4253&page=0
-  return gw2API.get('/characters', {params: {access_token, page: 0}})
+  if (requestDetails) {return gw2API.get('/characters', {params: {access_token, page: 0}})}
+  else                {return gw2API.get('/characters', {params: {access_token}})}
+}
+
+gw2API.character = (access_token, character) => {
+  // https://api.guildwars2.com/v2/characters/Cinderred?access_token=D2B5389F-F40A-4547-9D2C-FAC66DACEB63374FC165-8917-4A24-9DB0-74602CBF4253
+  return gw2API.get('/characters/' + character, {params:{access_token}})
 }
 
 gw2API.sharedInventory = (access_token) => {
@@ -87,4 +93,64 @@ gw2API.sharedInventory = (access_token) => {
 gw2API.materials = (access_token) => {
   // https://api.guildwars2.com/v2/account/materials?access_token=D2B5389F-F40A-4547-9D2C-FAC66DACEB63374FC165-8917-4A24-9DB0-74602CBF4253
   return gw2API.get('/account/materials', {params: {access_token}})
+}
+
+
+
+/*//////////////////////////////////////////////////////
+
+    CUSTOM FUNCTIONS
+
+//////////////////////////////////////////////////////*/
+
+gw2API.characterBags = (apikey, character) => {
+  return gw2API.character(apikey, character)
+    .then((res) => {
+      return res.data.bags
+    })
+}
+
+//this returns just an array of the items, no bag data, but keeping empty item slots
+gw2API.characterInventory = (apikey, character) => {
+  return gw2API.characterBags(apikey, character)
+    .then((bags) => {
+      let inventory = []
+      //loop through each bag slot
+      for (let bagIndex = 0; bagIndex < bags.length; bagIndex++){
+        //skip null bags
+        if (bags[bagIndex]) {
+          //loop through each item slot
+          let bag = bags[bagIndex].inventory
+          for (let itemIndex = 0; itemIndex< bag.length; itemIndex++) {
+            //DON'T skip null item slots
+            inventory.push(bag[itemIndex])
+          }
+        }
+      }
+
+      return inventory
+    })
+}
+//this returns an array of items WITHOUT empty slots
+gw2API.characterItems = (apikey, character) => {
+  return gw2API.characterBags(apikey, character)
+    .then((bags) => {
+      let items = []
+      //loop through each bag slot
+      for (let bagIndex = 0; bagIndex < bags.length; bagIndex++){
+        //skip null bags
+        if (bags[bagIndex]) {
+          //loop through each item slot
+          let bag = bags[bagIndex].inventory
+          for (let itemIndex = 0; itemIndex< bag.length; itemIndex++) {
+            //SKIP null item slots
+            if (bag[itemIndex]){
+              items.push(bag[itemIndex])
+            }
+          }
+        }
+      }
+
+      return items
+    })
 }

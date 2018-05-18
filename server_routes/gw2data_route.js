@@ -39,10 +39,18 @@ router
 
   //used to check if user is logged in
   .get('/user', (req, res, next) => {
-    console.log('request for user, returning: ' + JSON.stringify(req.user))
     if (req.user) res.json(req.user)
     else res.json(null)
   })
+
+  .get('/items', (req, res, next) => {
+    const ids = req.params
+    //request data about those ids from DB
+    DB.getItemDetails(ids)
+  })
+
+
+
 
   .post('/login', passport.authenticate('local'), (req, res) => {
     //if autehenticated, will return user:
@@ -58,9 +66,20 @@ router
       res.sendStatus(200)
     }
   })
-  .post('/signup', passport.authenticate('local-register'), (req, res) => {
-    //if successful return user
-    res.json(req.user)
+  .post('/signup', (req, res, next) => {
+    passport.authenticate('local-register', (err, user, info) => {
+      // if error during authentication
+      if (err) {
+        console.error(err)
+        return next(err)
+      }
+      //if user did not authenticate
+      if (!user) {
+        return res.status(401).send(info.message)
+      }
+      //if autehenticated, will return user:
+      res.json(req.user)
+    })(req, res, next)
   })
 
 

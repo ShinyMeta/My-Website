@@ -9,8 +9,8 @@ export default class Home extends React.Component {
     //display app if logged in, passing route down
     if (this.props.user) {
       return (
-        <Route path = "/" component = {() => {
-          return <App user = {this.props.user} setUser = {this.props.setUser} />
+        <Route path = "/" render = {(props) => {
+          return <App {...props} user = {this.props.user} setUser = {this.props.setUser} />
         }} />
       )
     }

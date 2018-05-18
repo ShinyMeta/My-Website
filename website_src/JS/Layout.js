@@ -1,5 +1,4 @@
 import axios from 'axios'
-import PropTypes from 'prop-types'
 import React from 'react'
 import { Route, Switch, Redirect, withRouter } from 'react-router-dom'
 
@@ -8,8 +7,6 @@ import { Route, Switch, Redirect, withRouter } from 'react-router-dom'
 import Header from './components/Header'
 
 //pages
-import _404page from './pages/_404page.js'
-import App from './pages/App.js'
 import Home from './pages/Home.js'
 import Login from './pages/Login.js'
 
@@ -21,7 +18,6 @@ class Layout extends React.Component {
     super(props)
     this.state = {
       user: null,
-      // authenticated: false
     }
 
     this.setUser = this.setUser.bind(this)
@@ -43,18 +39,15 @@ class Layout extends React.Component {
 
 
   setUser(user) {
-    // let authenticated
     if (user){
       //if user changes to logged in, change page to app
       if (user != this.state.user) {
-        // authenticated = true
-        this.setState({user/*, authenticated*/})
+        this.setState({user})
       }
     }
     //if user changes to null/logged out, change page to login
     else {
-      // authenticated = false
-      this.setState({user/*, authenticated*/})
+      this.setState({user})
     }
   }
 
@@ -64,24 +57,18 @@ class Layout extends React.Component {
 
 
   render() {
-
-    // if (this.state.user && this.props.location.pathname != '/') {
-    //   return <Redirect to = '/' />
-    // }
-
     return (
       <div>
         <Header />
         <Switch>
-          <Route path = "/login" component={() => {
+          <Route path = "/login" render={() => {
               return <Login user = {this.state.user}
                       setUser = {this.setUser.bind(this)}/>
             }}/>
-          <Route path = "/" component={(props) => {
+          <Route path = "/" render={(props) => {
               return <Home {...props} user = {this.state.user}
                       setUser = {this.setUser.bind(this)}/>
             }}/>
-          {/* <Route component={_404page} /> */}
         </Switch>
       </div>
     )
