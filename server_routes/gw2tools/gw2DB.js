@@ -56,64 +56,41 @@ module.exports = gw2DB
 
 
 gw2DB.getItemDetails = (ids) => {
+  let idArray
+  if (Array.isArray(ids))
+    idArray = ids
+  else
+    idArray = [ids] //if ids was a single id, make it an array for the query
 
-  //single ID
-  if (!Array.isArray(ids)){
-    let item = {}
-    return Promise.all([
-      gw2DB('items')
-        .where('item_id', ids)
-        .first(),
-      gw2DB.select('value').from('items_itemflags AS a')
-        .innerJoin('itemflags AS b', 'a.item_id', 'b.item_id')
-        .where('item_id', ids)
-        .then((results) => { return {flags: results.map(x => x.value)} }),
-      gw2DB.select('value').from('items_itemgametypes AS a')
-        .innerJoin('itemgametypes AS b', 'a.item_id', 'b.item_id')
-        .where('item_id', ids)
-        .then((results) => { return {gametypes: results.map(x => x.value)} }),
-      gw2DB.select('value').from('items_itemrestrictions AS a')
-        .innerJoin('itemrestrictions AS b', 'a.item_id', 'b.item_id')
-        .where('item_id', ids)
-        .then((results) => { return {restrictions: results.map(x => x.value)} })
-    ])
-    .then((results) => {
-      Object.assign(item, results[0],results[1],results[2],results[3])
-      return item
-    })
-  }
 
-  //array of ids
-  return Promise.all([
-    gw2DB('items')
-      .where('item_id', ids)
-      .then((items) => {
-        //turn this list of items into an associative array item, by id
-        let result = {}
-        items.forEach((item) => { result[item.item_id] = item })
-        return result
-      }),
-
-    gw2DB.select('item_id', 'value').from('items_itemflags AS a')
-      .innerJoin('itemflags AS b', 'a.item_id', 'b.item_id')
-      .whereIn('item_id', ids),
-
-    gw2DB.select('item_id', 'value').from('items_itemgametypes AS a')
-      .innerJoin('itemgametypes AS b', 'a.item_id', 'b.item_id')
-      .whereIn('item_id', ids),
-
-    gw2DB.select('item_id', 'value').from('items_itemrestrictions AS a')
-      .innerJoin('itemrestrictions AS b', 'a.item_id', 'b.item_id')
-      .whereIn('item_id', ids)
-  ])
-  .then((results) => {
-    //need to put flags, gametypes and restrictions into their items
-
-  })
+  return gw2DB.from(
+    gw2DB('ref_items').whereIn('item_id', idArray).as('a')
+  ).joinRaw('NATURAL LEFT JOIN ?',
+    gw2DB.select(gw2DB.raw('item_id, JSON_ARRAYAGG(value) AS flags'))
+      .from ('ref_items_itemflags')
+      .innerJoin('ref_itemflags',
+        'ref_items_itemflags.itemflag_id', 'ref_itemflags.itemflag_id')
+      .whereIn('item_id', idArray)
+      .groupBy('item_id')
+    .as('b')
+  ).joinRaw('NATURAL LEFT JOIN ?',
+    gw2DB.select(gw2DB.raw('item_id, JSON_ARRAYAGG(value) AS gametypes'))
+      .from ('ref_items_itemgametypes')
+      .innerJoin('ref_itemgametypes',
+        'ref_items_itemgametypes.itemgametype_id', 'ref_itemgametypes.itemgametype_id')
+      .whereIn('item_id', idArray)
+      .groupBy('item_id')
+    .as('c')
+  ).joinRaw('NATURAL LEFT JOIN ?',
+    gw2DB.select(gw2DB.raw('item_id, JSON_ARRAYAGG(value) AS restrictions'))
+      .from ('ref_items_itemrestrictions')
+      .innerJoin('ref_itemrestrictions',
+        'ref_items_itemrestrictions.itemrestriction_id', 'ref_itemrestrictions.itemrestriction_id')
+      .whereIn('item_id', idArray)
+      .groupBy('item_id')
+    .as('d')
+  )
 }
-
-
-
 
 
 

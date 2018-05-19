@@ -43,10 +43,15 @@ router
     else res.json(null)
   })
 
-  .get('/items', (req, res, next) => {
-    const ids = req.params
-    //request data about those ids from DB
+  .get('/itemDetails', (req, res, next) => {
+    const ids = req.query.ids.split(',').map(x => parseInt(x))
+    console.log(ids)
+    // request data about those ids from DB
     DB.getItemDetails(ids)
+      .then ((itemDetails) => {
+        console.log(itemDetails)
+        res.json(itemDetails)
+      })
   })
 
 

@@ -76,7 +76,7 @@ passport.serializeUser((user, done) => {
 })
 
 passport.deserializeUser((id, done) => {
-  return DB('user_account_info')
+  DB('user_account_info')
     .where('user_id', id)
     .first()
     .then((user) => {

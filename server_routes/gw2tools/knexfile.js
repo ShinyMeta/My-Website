@@ -8,7 +8,8 @@ module.exports = {
       user: 'root',
       password: 'mywebserver',
       database: 'gw2_tools_dev'
-    }
+    },
+    debug: true
   },
 
   production: {
