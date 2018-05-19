@@ -1,3 +1,4 @@
 node_modules
-root\pogomapp-data\Maps
-.eslintrc.json
+ExpressServer.js
+**/gw2data.bundle.js
+**/gw2data.bundle.js.map
