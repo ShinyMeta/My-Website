@@ -175,6 +175,7 @@ export default class App extends React.Component {
               return <App_4Stopped {...props} user = {this.props.user}
                 selectedCharacter={this.state.selectedCharacter}
                 setDifferences={this.setDifferences}
+                timeElapsed = {this.state.timeElapsed}
               />
             }} />
           <Route path="/5-editing" render = {(props) => {

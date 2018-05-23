@@ -181,7 +181,7 @@ gw2DB.getStartEndDifferences = (record_id) => {
         gw2data_start_items a
         LEFT JOIN
         gw2data_end_items b
-        ON (a.item_id = b.item_id)
+        ON (a.item_id = b.item_id AND a.record_id = b.record_id)
         WHERE a.record_id = ${record_id}
         AND (b.quantity IS NULL
         OR a.quantity != b.quantity)
@@ -190,7 +190,7 @@ gw2DB.getStartEndDifferences = (record_id) => {
         gw2data_start_items a
         RIGHT OUTER JOIN
         gw2data_end_items b
-        ON (a.item_id = b.item_id)
+        ON (a.item_id = b.item_id AND a.record_id = b.record_id)
         WHERE b.record_id = ${record_id}
         AND a.quantity IS NULL) x
       INNER JOIN
@@ -203,7 +203,7 @@ gw2DB.getStartEndDifferences = (record_id) => {
           gw2data_start_currencies a
           LEFT JOIN
           gw2data_end_currencies b
-          ON (a.currency_id = b.currency_id)
+          ON (a.currency_id = b.currency_id AND a.record_id = b.record_id)
           WHERE a.record_id = ${record_id}
           AND (b.quantity IS NULL
           OR a.quantity != b.quantity)
@@ -212,7 +212,7 @@ gw2DB.getStartEndDifferences = (record_id) => {
           gw2data_start_currencies a
           RIGHT OUTER JOIN
           gw2data_end_currencies b
-          ON (a.currency_id = b.currency_id)
+          ON (a.currency_id = b.currency_id AND a.record_id = b.record_id)
           WHERE b.record_id = ${record_id}
           AND a.quantity IS NULL) x
         INNER JOIN

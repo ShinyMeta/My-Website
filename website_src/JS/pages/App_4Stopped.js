@@ -14,7 +14,8 @@ const propTypes = {
   user: PropTypes.object,
   selectedCharacter: PropTypes.string,
   setDifferences: PropTypes.func.isRequired,
-  history: PropTypes.object.isRequired
+  history: PropTypes.object.isRequired,
+  timeElapsed: PropTypes.number.isRequired
 }
 export default class App_4Stopped extends React.Component {
   constructor(props) {

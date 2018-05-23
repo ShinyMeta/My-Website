@@ -2,6 +2,7 @@ import axios from 'axios'
 import React from 'react';
 
 import GW2API from '../../../server_routes/gw2tools/gw2API.js'
+import gw2MyTools from '../../../server_routes/gw2tools/gw2MyTools.js'
 import Item from '../components/Item.js'
 import Loading from '../components/Loading.js'
 
@@ -138,34 +139,39 @@ export default class Header extends React.Component {
 
   //this gets the details of the items from the server, overwriting the
   getFirstFiveDetails() {
-    let item_ids = []
-    let id_indexer = {}
-    for (let i = 0; i < 5; i++) {
-      const item = this.state.selectedCharacterInventory[i]
-      //skip null
-      if (item){
-        //save the indxexer of the id in indexer
-        id_indexer[item.id] = i
-        item_ids.push(item.id)
-      }
-    }
-    if (item_ids.length === 0) {
-      // all null, all done now
-      this.setState({firstFiveUpdated: true})
-    }
-    else {
-      //we have some ids, now lets request details from server
-      axios.get('./itemDetails', {params: {ids: item_ids.toString()}})
-        .then((res) => {
-          let inventoryCopy = this.state.selectedCharacterInventory.slice()
-          const itemDetails = res.data
-          itemDetails.forEach((x) => {
-            let i = id_indexer[x.item_id]
-            inventoryCopy[i] = x
-          })
-          this.setState({selectedCharacterInventory: inventoryCopy, firstFiveUpdated: true})
-        })
-    }
+    gw2MyTools.fillItemDetails(this.state.selectedCharacterInventory)
+      .then((inventoryWithDetails) => {
+        this.setState({selectedCharacterInventory: inventoryWithDetails, firstFiveUpdated: true})
+      })
+
+    // let item_ids = []
+    // let id_indexer = {}
+    // for (let i = 0; i < 5; i++) {
+    //   const item = this.state.selectedCharacterInventory[i]
+    //   //skip null
+    //   if (item){
+    //     //save the indxexer of the id in indexer
+    //     id_indexer[item.id] = i
+    //     item_ids.push(item.id)
+    //   }
+    // }
+    // if (item_ids.length === 0) {
+    //   // all null, all done now
+    //   this.setState({firstFiveUpdated: true})
+    // }
+    // else {
+    //   //we have some ids, now lets request details from server
+    //   axios.get('./itemDetails', {params: {ids: item_ids.toString()}})
+    //     .then((res) => {
+    //       let inventoryCopy = this.state.selectedCharacterInventory.slice()
+    //       const itemDetails = res.data
+    //       itemDetails.forEach((x) => {
+    //         let i = id_indexer[x.item_id]
+    //         inventoryCopy[i] = x
+    //       })
+    //       this.setState({selectedCharacterInventory: inventoryCopy, firstFiveUpdated: true})
+    //     })
+    // }
   }
 
 
@@ -262,6 +268,10 @@ export default class Header extends React.Component {
 
 
   render() {
+    if (!this.state.firstFiveUpdated){
+      return <Loading />
+    }
+    
     return (
       <div>
         <div>{`The API shows these items as the first 5 slots in ${this.props.selectedCharacter}'s inventory:`}</div>
