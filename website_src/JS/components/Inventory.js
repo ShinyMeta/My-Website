@@ -1,10 +1,13 @@
 import PropTypes from 'prop-types'
 import React from 'react'
 
-const propTypes = {
+import InventoryBag from './InventoryBag.js'
+import Loading from '../components/Loading.js'
 
+const propTypes = {
+  bags: PropTypes.array,
 }
-export default class CLASS_NAME extends React.Component {
+export default class Inventory extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
@@ -14,7 +17,7 @@ export default class CLASS_NAME extends React.Component {
 
   //////////////////////////////////////////////////////////////////////////////
   // REACT METHODS
-  ////////////////////
+  ///////////////////
 
 
   //////////////////////////////////////////////////////////////////////////////
@@ -33,12 +36,14 @@ export default class CLASS_NAME extends React.Component {
 
 
   render() {
-    return (
-      <div>
-
-      </div>
-    )
+    if (!this.props.bags){
+      return <Loading />
+    } else {
+      return this.props.bags.map((bag, index) => {
+        return <InventoryBag key={index} index={index} bag={bag}/>
+      })
+    }
   }
 }
 
-CLASS_NAME.propTypes = propTypes
+Inventory.propTypes = propTypes

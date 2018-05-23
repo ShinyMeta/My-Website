@@ -47,11 +47,203 @@ const gw2_ref_DB_queue = new PQueue({concurrency: MAX_CONCURR_DB_INSERTS})
 //       GLOBAL VARIABLES
 //////////////////////////////////
 
-//INDEXERs can take in either the value or the ID in [], and return the other
-let FLAG_INDEXER = {}, GAMETYPE_INDEXER = {}, RESTRICTION_INDEXER = {}
-
 
 module.exports = gw2DB
+
+
+
+gw2DB.getActiveRecordByUser = (user_id) => {
+  return gw2DB('gw2data_records').where({user_id, status: 'running'})
+      .orWhere({user_id, status: 'stopped'})
+      .orWhere({user_id, status: 'editing'})
+      .first()
+}
+
+
+gw2DB.storeStartState = (startState) => {
+  //create new record:
+  const record = {
+    user_id: startState.user_id,
+    character_name: startState.character.name,
+    character_class: startState.character.class,
+    character_level: startState.character.level,
+    status: 'running',
+    start_time: gw2DB.fn.now(),
+  }
+  const items = startState.items
+  const currencies = startState.currencies
+
+  return gw2DB('gw2data_records')
+    .insert(record)
+    .then((id) => {
+      //store the items and currencies
+      return Promise.all([
+        insertRecordArrayData(items, 'gw2data_start_items', id),
+        insertRecordArrayData(castCurrencyArrayForRecord(currencies), 'gw2data_start_currencies', id),
+      ])
+    })
+    .catch((err) => {
+      console.error(err)
+    })
+}
+
+gw2DB.storeStopState = (end_time, record) => {
+  const duration = end_time-record.start_time
+  return gw2DB('gw2data_records')
+    .where('record_id', record.record_id)
+    .update({
+      status: 'stopped',
+      end_time: new Date(end_time),
+      duration
+    })
+    .catch ((err) => {
+      console.error(err)
+    })
+}
+
+gw2DB.storeEndState = (endState, record) => {
+  //need to update the record with status: 'editing' and salvage settings
+  return Promise.all([
+    insertRecordArrayData(endState.items, 'gw2data_end_items', record.record_id),
+    insertRecordArrayData(castCurrencyArrayForRecord(endState.currencies),
+                'gw2data_end_currencies', record.record_id),
+    gw2DB('gw2data_records')
+      .where('record_id', record.record_id)
+      .update({
+        status: 'editing',
+        green_salvage: endState.green_salvage,
+        yellow_salvage: endState.yellow_salvage,
+        magic_find: endState.magic_find
+      })
+    ])
+    .catch ((err) => {
+      console.error(err)
+    })
+}
+
+
+
+//stores the indicated array in the indicated table
+function insertRecordArrayData(array, tablename, record_id) {
+  let inserts = []
+  array.forEach(({...rest}) => {
+    inserts.push(gw2DB(tablename)
+    .insert({record_id, ...rest}))
+  })
+  return Promise.all(inserts)
+}
+
+function castCurrencyArrayForRecord(currencyArray){
+  let newArray = []
+  currencyArray.forEach((currency) => {
+    newArray.push({
+      currency_id: currency.id,
+      quantity: currency.value,
+    })
+  })
+  return newArray
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+gw2DB.getStartEndDifferences = (record_id) => {
+
+  //special query
+  //want to join start and end on item_id,
+  //where start qty != end qty/ either is null
+  //and where record_id
+
+  return Promise.all([
+    gw2DB.raw(`
+      SELECT * FROM
+      (SELECT a.item_id, a.binding, (IFNULL(b.quantity, 0) - a.quantity) difference FROM
+        gw2data_start_items a
+        LEFT JOIN
+        gw2data_end_items b
+        ON (a.item_id = b.item_id)
+        WHERE a.record_id = ${record_id}
+        AND (b.quantity IS NULL
+        OR a.quantity != b.quantity)
+      UNION
+      SELECT b.item_id, b.binding, (b.quantity - IFNULL(a.quantity, 0)) difference FROM
+        gw2data_start_items a
+        RIGHT OUTER JOIN
+        gw2data_end_items b
+        ON (a.item_id = b.item_id)
+        WHERE b.record_id = ${record_id}
+        AND a.quantity IS NULL) x
+      INNER JOIN
+        ref_items y
+        USING (item_id)
+      `).then(res => res[0]),
+      gw2DB.raw(`
+        SELECT * FROM
+        (SELECT a.currency_id, (IFNULL(b.quantity, 0) - a.quantity) difference FROM
+          gw2data_start_currencies a
+          LEFT JOIN
+          gw2data_end_currencies b
+          ON (a.currency_id = b.currency_id)
+          WHERE a.record_id = ${record_id}
+          AND (b.quantity IS NULL
+          OR a.quantity != b.quantity)
+        UNION
+        SELECT b.currency_id, (b.quantity - IFNULL(a.quantity, 0)) difference FROM
+          gw2data_start_currencies a
+          RIGHT OUTER JOIN
+          gw2data_end_currencies b
+          ON (a.currency_id = b.currency_id)
+          WHERE b.record_id = ${record_id}
+          AND a.quantity IS NULL) x
+        INNER JOIN
+          ref_currencies y
+          USING (currency_id)
+      `).then(res => res[0])
+      .catch((err) => {
+
+      })
+  ])
+  .then((results) => {
+    return {
+      items: results[0],
+      currencies: results[1],
+    }
+  })
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -131,15 +323,6 @@ gw2DB.getItemDetails = (ids) => {
 
 
 
-
-
-
-
-
-
-
-
-
 ////////////////////////////////////////////
 ////////////////////////////////////////////
 ////////////////////////////////////////////
@@ -148,6 +331,8 @@ gw2DB.getItemDetails = (ids) => {
 ////////////////////////////////////////////
 ////////////////////////////////////////////
 
+//INDEXERs can take in either the value or the ID in [], and return the other
+let FLAG_INDEXER = {}, GAMETYPE_INDEXER = {}, RESTRICTION_INDEXER = {}
 
 
 gw2DB.updateRefTables = function() {

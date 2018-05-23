@@ -2,12 +2,15 @@ import React from 'react'
 import { Link, Redirect, Route } from 'react-router-dom'
 
 import App from './App.js'
+import Loading from '../components/Loading.js'
 
 export default class Home extends React.Component {
   render() {
-
+    if (this.props.user === 'pending') {
+      return <Loading />
+    }
     //display app if logged in, passing route down
-    if (this.props.user) {
+    else if (this.props.user) {
       return (
         <Route path = "/" render = {(props) => {
           return <App {...props} user = {this.props.user} setUser = {this.props.setUser} />

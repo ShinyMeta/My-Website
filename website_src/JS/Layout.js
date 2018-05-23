@@ -17,7 +17,7 @@ class Layout extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
-      user: null,
+      user: 'pending',
     }
 
     this.setUser = this.setUser.bind(this)
@@ -39,14 +39,7 @@ class Layout extends React.Component {
 
 
   setUser(user) {
-    if (user){
-      //if user changes to logged in, change page to app
-      if (user != this.state.user) {
-        this.setState({user})
-      }
-    }
-    //if user changes to null/logged out, change page to login
-    else {
+    if (!user || user != this.state.user){
       this.setState({user})
     }
   }

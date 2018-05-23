@@ -96,11 +96,12 @@ export default class SignupForm extends React.Component {
         const permissions = res.data.permissions
         let wallet = permissions.find((x) => x == 'wallet')
         let inventories = permissions.find((x) => x == 'inventories')
+        let characters = permissions.find((x) => x == 'characters')
 
-        if (wallet && inventories) {
+        if (wallet && inventories && characters) {
           this.setState(() => ({apikeyVerified: true, apikeyMessage: 'VERIFIED'}))
         } else {
-          this.setState(() => ({apikeyVerified: false, apikeyMessage: 'The apikey is missing permissions for wallet and/or inventory'}))
+          this.setState(() => ({apikeyVerified: false, apikeyMessage: 'The apikey is missing permissions for wallet, inventory and/or characters'}))
         }
       })
       .catch((err) => {

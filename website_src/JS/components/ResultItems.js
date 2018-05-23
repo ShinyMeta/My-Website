@@ -1,10 +1,13 @@
 import PropTypes from 'prop-types'
 import React from 'react'
 
-const propTypes = {
+import Item from '../components/Item.js'
 
+const propTypes = {
+  items: PropTypes.array.isRequired,
+  onDoubleClick: PropTypes.func.isRequired,
 }
-export default class CLASS_NAME extends React.Component {
+export default class ResultItems extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
@@ -30,15 +33,24 @@ export default class CLASS_NAME extends React.Component {
   //////////////////////////////////////////////////////////////////////////////
   // RENDER METHODS
   ///////////////////
+  renderItems() {
+    //go through each item, add difference attr, and render item
+    let itemComponents = this.props.items.map((item) => {
+      return <Item item = {item} key = {item.item_id}
+        onDoubleClick={this.props.onDoubleClick}/>
+    })
+    return itemComponents
+  }
 
 
   render() {
     return (
-      <div>
-
+      <div style={{width: '640px'}}>
+        <h4>Items</h4>
+        {this.renderItems()}
       </div>
     )
   }
 }
 
-CLASS_NAME.propTypes = propTypes
+ResultItems.propTypes = propTypes

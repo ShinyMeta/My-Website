@@ -9,7 +9,7 @@ module.exports = {
       password: 'mywebserver',
       database: 'gw2_tools_dev'
     },
-    debug: true
+    // debug: true
   },
 
   production: {

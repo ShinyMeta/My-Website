@@ -33,7 +33,7 @@ function authenticate(username, password, done) {
 }
 
 function register(req, username, password, done) {
-  DB('user_account_info')
+  return DB('user_account_info')
     .where('username', username)
     .orWhere('email', req.body.email)
     .first()
@@ -53,17 +53,13 @@ function register(req, username, password, done) {
         apikey: req.body.apikey
       }
 
-
-
-      DB('user_account_info')
+      return DB('user_account_info')
         .insert(new_user)
         .then(([id]) => {
           new_user.user_id = id
           return done(null, new_user)
         })
         .catch(done)
-
-
     })
     .catch(done)
 }
@@ -76,11 +72,13 @@ passport.serializeUser((user, done) => {
 })
 
 passport.deserializeUser((id, done) => {
-  DB('user_account_info')
+  return DB('user_account_info')
     .where('user_id', id)
     .first()
     .then((user) => {
-      return done(null, user)
+      done(null, user)
+      return null
     })
     .catch(done)
+
 })

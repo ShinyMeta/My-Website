@@ -21,7 +21,7 @@ export default class SignupEmailField extends React.Component {
         <input type = "text" name = "apikey" id = "apikey" required
           onChange={this.props.onChange}/>
 
-        <label>{"(Must have access to 'wallet' and 'inventories')"}</label>
+        <label>{"(Must have access to 'wallet,' 'inventories' and 'characters')"}</label>
 
           <br/>
 

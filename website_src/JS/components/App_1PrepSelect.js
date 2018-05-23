@@ -16,8 +16,7 @@ export default class App_1PrepSelect extends React.Component {
   componentDidMount() {
     //get the character list from api
     GW2API.characters(this.props.user.apikey, false)
-      .then((res) => {
-        const characters = res.data
+      .then((characters) => {
         this.setState({characters})
       })
       .catch((err) => {
