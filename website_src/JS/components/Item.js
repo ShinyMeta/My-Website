@@ -68,7 +68,7 @@ export default class Item extends React.Component {
 
   render() {
     return (
-      <div className="Item" item_id = {this.props.item.item_id}
+      <div className="Item" item_id = {this.props.item.item_id || this.props.item.id}
         style={{float: 'left', width: '64px', height: '64px', position:'relative',
             textAlign:'center', fontWeight: 'bold', textShadow: '1px 1px black'}}
         onDoubleClick = {this.props.onDoubleClick}
