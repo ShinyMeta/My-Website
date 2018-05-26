@@ -1,3 +1,4 @@
+import axios from 'axios'
 import PropTypes from 'prop-types'
 import React from 'react'
 
@@ -10,7 +11,10 @@ import Timer from '../components/Timer.js'
 const propTypes = {
   timeElapsed: PropTypes.number,
   differences: PropTypes.object,
-
+  setDifferences: PropTypes.func.isRequired,
+  history: PropTypes.object.isRequired,
+  setCurrentStep: PropTypes.func.isRequired,
+  
 }
 export default class App_5Editing extends React.Component {
   constructor(props) {
@@ -28,6 +32,30 @@ export default class App_5Editing extends React.Component {
   //////////////////////////////////////////////////////////////////////////////
   // EVENT HANDLERS
   ///////////////////
+
+  onConfirmClick(e) {
+    //send back the differences object, but first check each id incase you shouldn't send it
+    let editedDifferences = { items: [], currencies: [] }
+    const differences = this.props.differences
+    const removed = this.state.removed
+
+    differences.items.forEach((item) => {
+      if (!removed[item.item_id])
+        editedDifferences.items.push(item)
+    })
+    differences.currencies.forEach((currency) => {
+      if (!removed[currency.currency_id])
+        editedDifferences.currencies.push(currency)
+    })
+    //now sending
+    axios.post('/gw2data/editedResultsRecord', editedDifferences)
+      .then(() => {
+        this.props.setDifferences(editedDifferences)
+      })
+    this.props.history.push('./6-finish')
+    this.props.setCurrentStep(6)
+  }
+
 
   handleDoubleClick(e) {
     //first, get the parent item div
@@ -67,6 +95,7 @@ export default class App_5Editing extends React.Component {
     }
     return (
       <div>
+        <button type="button" onClick={this.onConfirmClick.bind(this)}>Confirm Changes</button>
         <Timer
           timeElapsed = {this.props.timeElapsed}
           isStopped = {true}

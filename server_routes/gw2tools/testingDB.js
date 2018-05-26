@@ -5,9 +5,10 @@ const DB = require('./gw2DB.js')
 
 
 
-DB.getStartEndDifferences(16)
+DB.getEditedResults(16)
   .then((result) => {
     console.log(result.items)
+    console.log(result.currencies)
   })
 
 // const stop_time = Date.now()
@@ -50,7 +51,8 @@ DB.getStartEndDifferences(16)
 
 
 //
-// DB.getItemDetails([78954,78988,78754])
+// DB.getItemDetails()
+//   .whereIn('item_id', [78954,78988,78754])
 //   .then((results) => {
 //     console.log(results)
 //   })

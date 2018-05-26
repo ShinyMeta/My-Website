@@ -6,6 +6,9 @@ import axios from 'axios'
 module.exports = {
 
   getItemDetails(ids) {
+    if (ids.length === 0) {
+      return Promise.resolve([])
+    }
     return axios.get('/gw2data/itemDetails', {params: {ids: ids.toString()}})
       .then((res) => {
         return res.data

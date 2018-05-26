@@ -39,7 +39,7 @@ export default class Currency extends React.Component {
         {currency.value}
       </div>
     if (currency.difference >= 0)
-      return <div style={{position: 'absolute', bottom: '2px', left: '2px', color: '#5dd55d'}}
+      return <div style={{position: 'absolute', bottom: '2px', right: '2px', color: '#5dd55d'}}
         title={'+'+currency.difference}>
         +{currency.difference}
       </div>
@@ -70,7 +70,8 @@ export default class Currency extends React.Component {
     return (
       <div className="Currency" currency_id={this.props.currency.currency_id}
         style={{float: 'left', width: '64px', height: '64px', position:'relative',
-            textAlign:'center', fontWeight: 'bold', textShadow: '1px 1px black'}}
+            textAlign:'center', fontWeight: 'bold',
+            textShadow: '-1px 0 black, 0 1px black, 1px 0 black, 0 -1px black'}}
         onDoubleClick = {this.props.onDoubleClick}
       >
         {this.renderCurrencyImage()}

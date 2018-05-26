@@ -10,6 +10,7 @@ import App_2Start from './App_2Start.js'
 import App_3Running from './App_3Running.js'
 import App_4Stopped from './App_4Stopped.js'
 import App_5Editing from './App_5Editing.js'
+import App_6Finish from './App_6Finish.js'
 import Loading from '../components/Loading.js'
 
 export default class App extends React.Component {
@@ -22,12 +23,14 @@ export default class App extends React.Component {
       timeElapsed: 0,
       timerInterval: null,
       end_time: 0,
-      differences: 'pending'
+      differences: 'pending',
+      editedResults: null
     }
 
 
     //functions to passdown
     this.setSelectedCharacter = this.setSelectedCharacter.bind(this)
+    this.setCurrentStep = this.setCurrentStep.bind(this)
     this.setStartTime = this.setStartTime.bind(this)
     this.setTimerInterval = this.setTimerInterval.bind(this)
     this.setTimeElapsed = this.setTimeElapsed.bind(this)
@@ -38,6 +41,10 @@ export default class App extends React.Component {
 
   setSelectedCharacter(character){
     this.setState({selectedCharacter: character})
+  }
+
+  setCurrentStep(currentStep){
+    this.setState({currentStep})
   }
 
   setStartTime(start_time){
@@ -80,17 +87,34 @@ export default class App extends React.Component {
   // EVENT HANDLERS
   ///////////////////
 
-  onClick(e) {
+  onLogoutClick(e) {
     //send logout to server to destroy session
     axios.post('/gw2data/logout')
-    .then((res) => {
-      //setUser on page to null
-      this.props.setUser(null)
-    })
-    .catch((err) => {
-      console.log('there was an error communicating with the server')
-      console.error(err)
-    })
+      .then((res) => {
+        //setUser on page to null
+        this.props.setUser(null)
+      })
+      .catch((err) => {
+        console.log('there was an error communicating with the server')
+        console.error(err)
+      })
+  }
+
+
+  onCancelClick(e) {
+    if (confirm('Are you sure you want to cancel this recording? (You wil not be able to finish, and all data gathered will be lost)')){
+      //send request to calncel recording
+      this.setState({currentStep: 0})
+      this.props.history.push('/')
+      axios.post('/gw2data/cancelRecord')
+        .then((res) => {
+
+        })
+        .catch((err) => {
+          console.log('there was an error communicating with the server')
+          console.error(err)
+        })
+    }
   }
 
 
@@ -105,7 +129,7 @@ export default class App extends React.Component {
   getCurrentStep() {
     axios.get('/gw2data/currentStep')
       .then((res) => {
-        const {currentStep, selectedCharacter, start_time, end_time, differences} = res.data
+        const {currentStep, selectedCharacter, start_time, end_time, differences, editedResults} = res.data
         switch(currentStep) {
           case 0:
             this.setState({currentStep},
@@ -128,6 +152,13 @@ export default class App extends React.Component {
                   differences},
               () => this.props.history.push('./5-editing'))
             break
+          case 6:
+            this.setState({currentStep, selectedCharacter,
+                  start_time: Date.parse(start_time), end_time: Date.parse(end_time),
+                  timeElapsed: Date.parse(end_time) - Date.parse(start_time),
+                  editedResults},
+              () => this.props.history.push('./6-finish'))
+            break
 
         }
       })
@@ -144,8 +175,10 @@ export default class App extends React.Component {
     return (
       <div>
         <h2>Welcome, {this.props.user.username}! You are Signed in!</h2>
-        <button type="button" onClick = {this.onClick.bind(this)}>Logout</button>
+        <button type="button" onClick = {this.onLogoutClick.bind(this)}>Logout</button>
           <br />
+        <button type="button" onClick = {this.onCancelClick.bind(this)}
+          hidden={this.state.currentStep === 0}>Cancel Current Recording</button>
           <br />
         <Switch>
           <Route exact path="/" component = {App_0Begin}/>
@@ -159,6 +192,7 @@ export default class App extends React.Component {
               return <App_2Start {...props} user = {this.props.user}
                 selectedCharacter={this.state.selectedCharacter}
                 setStartTime = {this.setStartTime}
+                setCurrentStep = {this.setCurrentStep}
               />
             }} />
           <Route path="/3-running" render = {(props) => {
@@ -169,6 +203,7 @@ export default class App extends React.Component {
                 setTimerInterval = {this.setTimerInterval.bind(this)}
                 setTimeElapsed = {this.setTimeElapsed.bind(this)}
                 setEndTime = {this.setEndTime}
+                setCurrentStep = {this.setCurrentStep}
               />
             }} />
           <Route path="/4-stopped" render = {(props) => {
@@ -176,15 +211,24 @@ export default class App extends React.Component {
                 selectedCharacter={this.state.selectedCharacter}
                 setDifferences={this.setDifferences}
                 timeElapsed = {this.state.timeElapsed}
+                setCurrentStep = {this.setCurrentStep}
               />
             }} />
           <Route path="/5-editing" render = {(props) => {
               return <App_5Editing {...props} user = {this.props.user}
                 timeElapsed={this.state.timeElapsed}
                 differences={this.state.differences}
+                setDifferences={this.setDifferences}
+                setCurrentStep = {this.setCurrentStep}
               />
             }} />
-          <Route path="/6-finish" />
+          <Route path="/6-finish" render = {(props) => {
+              return <App_6Finish {...props} user = {this.props.user}
+                timeElapsed={this.state.timeElapsed}
+                editedResults={this.state.editedResults}
+                setCurrentStep = {this.setCurrentStep}
+              />
+            }} />
           <Route component={_404page} />
         </Switch>
       </div>

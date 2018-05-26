@@ -15,7 +15,8 @@ const propTypes = {
   selectedCharacter: PropTypes.string,
   setDifferences: PropTypes.func.isRequired,
   history: PropTypes.object.isRequired,
-  timeElapsed: PropTypes.number.isRequired
+  timeElapsed: PropTypes.number.isRequired,
+  setCurrentStep: PropTypes.func.isRequired,
 }
 export default class App_4Stopped extends React.Component {
   constructor(props) {
@@ -63,9 +64,11 @@ export default class App_4Stopped extends React.Component {
           .then((res) => {
             //res.data has the currency and item differences between the states, need to set that in state of app
             this.props.setDifferences(res.data)
-            this.props.history.push('./5-editing')
           })
       })
+
+    this.props.history.push('./5-editing')
+    this.props.setCurrentStep(5)
 
   }
 

@@ -75,6 +75,14 @@ router
                 differences})
             })
         }
+        else if (record.status === 'edited') {
+          DB.getEditedResults(record.record_id)
+            .then((editedResults) => {
+              res.json({currentStep: 6, selectedCharacter: record.character_name,
+                start_time: record.start_time, end_time: record.end_time,
+                editedResults})
+            })
+        }
       })
       .catch((err) => {
         console.error(err)
@@ -169,7 +177,70 @@ router
             })
             .catch((err) => {
               console.error(err)
+              res.status(500).send('Something went wrong')
             })
+        }
+      })
+  })
+
+  //body object contains results after editing by user, can be stored in results
+  .post('/editedResultsRecord', (req, res, next) => {
+    const resultState = req.body
+    //check first if there is an active record
+    DB.getActiveRecordByUser(req.user.user_id)
+      .then((record) => {
+        if ( !record || record.status != 'editing') {
+          res.status(403).send('There is no record for the authenticated user that is editing')
+        }
+        else {
+          DB.storeResultState(resultState, record)
+            .then(() => {
+              return DB.getEditedResults(record.record_id)
+            })
+            .then((editedResults) => {
+              res.json(editedResults)
+            })
+            .catch((err) => {
+              console.error(err)
+              res.status(500).send('Something went wrong')
+            })
+        }
+      })
+  })
+
+  .post('/finalizeRecord', (req, res, next)=> {
+    const finalState = req.body
+
+    DB.getActiveRecordByUser(req.user.user_id)
+      .then((record) => {
+        if ( !record || record.status != 'edited') {
+          res.status(403).send('There is no record for the authenticated user that is editing')
+        }
+        else {
+          DB.storeFinalState(finalState, record)
+            .then((editedResults) => {
+              res.status(200).send('Record was saved')
+            })
+            .catch((err) => {
+              console.error(err)
+              res.status(500).send('Something went wrong')
+            })
+        }
+      })
+  })
+
+  // '/cancelRecord' body is empty
+  .post('/cancelRecord', (req, res, next) => {
+    //check first if there is an active record
+    DB.getActiveRecordByUser(req.user.user_id)
+      .then((record) => {
+        if (!record) {
+          res.status(403).send('The server received a request to cancel the current record for a user that does not has an active record.')
+          return
+        }
+        else {
+          DB.cancelRecord(record)
+          res.status(200).send('Record was successfully cancelled.')
         }
       })
   })

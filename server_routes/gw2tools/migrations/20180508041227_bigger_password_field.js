@@ -9,6 +9,6 @@ exports.up = function(knex, Promise) {
 exports.down = function(knex, Promise) {
   return knex.raw(`
     ALTER TABLE user_account_info
-      MODIFY passwprd VARCHAR(45) NULL
+      MODIFY password VARCHAR(45) NULL
     `)
 };

@@ -12,7 +12,9 @@ const propTypes = {
   setTimerInterval: PropTypes.func.isRequired,
   setTimeElapsed: PropTypes.func.isRequired,
   setEndTime: PropTypes.func.isRequired,
-  history: PropTypes.object.isRequired
+  history: PropTypes.object.isRequired,
+  setCurrentStep: PropTypes.func.isRequired,
+  
 }
 export default class App_3Running extends React.Component {
   constructor(props) {
@@ -38,6 +40,8 @@ export default class App_3Running extends React.Component {
     this.props.setEndTime(end_time)
     //move to 4-stopped
     this.props.history.push('./4-stopped')
+    this.props.setCurrentStep(4)
+
   }
 
 

@@ -56,6 +56,7 @@ gw2DB.getActiveRecordByUser = (user_id) => {
   return gw2DB('gw2data_records').where({user_id, status: 'running'})
       .orWhere({user_id, status: 'stopped'})
       .orWhere({user_id, status: 'editing'})
+      .orWhere({user_id, status: 'edited'})
       .first()
 }
 
@@ -88,13 +89,11 @@ gw2DB.storeStartState = (startState) => {
 }
 
 gw2DB.storeStopState = (end_time, record) => {
-  const duration = end_time-record.start_time
   return gw2DB('gw2data_records')
     .where('record_id', record.record_id)
     .update({
       status: 'stopped',
       end_time: new Date(end_time),
-      duration
     })
     .catch ((err) => {
       console.error(err)
@@ -121,6 +120,72 @@ gw2DB.storeEndState = (endState, record) => {
     })
 }
 
+gw2DB.storeResultState = (resultState, record) => {
+  //need to update the record with status: 'editing' and salvage settings
+  const castedResultState = castResultStateforDB(resultState)
+  return Promise.all([
+      insertRecordArrayData(castedResultState.items, 'gw2data_result_items', record.record_id),
+      insertRecordArrayData(castedResultState.currencies, 'gw2data_result_currencies', record.record_id),
+      gw2DB('gw2data_records')
+        .where('record_id', record.record_id)
+        .update({status: 'edited'})
+    ])
+    .catch ((err) => {
+      console.error(err)
+    })
+}
+
+gw2DB.storeFinalState = (finalState, record) => {
+  const {method, map, strategy_nickname} = finalState
+  const {method_type, key_element} = method
+  let key_element_id = '-1'
+  if (method_type === 'Currency') {
+    key_element_id = key_element.currency_id
+  }
+  else if (method_type !== 'Farming') {
+    key_element_id = key_element.item_id
+  }
+  return gw2DB('gw2data_records')
+    .where('record_id', record.record_id)
+    .update({
+      status: 'saved',
+      method_type: finalState.method.method_type,
+      key_element: key_element_id,
+      map, strategy_nickname
+    })
+    .catch ((err) => {
+      console.error(err)
+    })
+}
+
+gw2DB.cancelRecord = (record) => {
+  //just set status to cancelled
+  return gw2DB('gw2data_records')
+    .where('record_id', record.record_id)
+    .update({
+      status: 'cancelled'
+    })
+    .catch ((err) => {
+      console.error(err)
+    })
+}
+
+
+
+//
+function castResultStateforDB(resultState) {
+  return {
+    items: resultState.items.map((item) => ({
+          binding: item.binding,
+          quantity: item.difference,
+          item_id: item.item_id,
+        })),
+    currencies: resultState.currencies.map((currency) => ({
+          quantity: currency.difference,
+          currency_id: currency.currency_id,
+        })),
+  }
+}
 
 
 //stores the indicated array in the indicated table
@@ -134,12 +199,11 @@ function insertRecordArrayData(array, tablename, record_id) {
 }
 
 function castCurrencyArrayForRecord(currencyArray){
-  let newArray = []
-  currencyArray.forEach((currency) => {
-    newArray.push({
+  let newArray = currencyArray.map((currency) => {
+    return {
       currency_id: currency.id,
       quantity: currency.value,
-    })
+    }
   })
   return newArray
 }
@@ -163,7 +227,22 @@ function castCurrencyArrayForRecord(currencyArray){
 
 
 
-
+gw2DB.getEditedResults = (record_id) => {
+  return Promise.all([
+    gw2DB('gw2data_result_items').where('record_id', record_id)
+      .innerJoin(itemDetailsQuery().as('b'),
+          'gw2data_result_items.item_id', 'b.item_id'),
+    gw2DB('gw2data_result_currencies').where('record_id', record_id)
+      .innerJoin('ref_currencies',
+          'gw2data_result_currencies.currency_id', 'ref_currencies.currency_id'),
+  ])
+  .then((results) => {
+    return {
+      items: results[0],
+      currencies: results[1]
+    }
+  })
+}
 
 
 
@@ -196,6 +275,7 @@ gw2DB.getStartEndDifferences = (record_id) => {
       INNER JOIN
         ref_items y
         USING (item_id)
+        ORDER BY difference ASC
       `).then(res => res[0]),
       gw2DB.raw(`
         SELECT * FROM
@@ -218,16 +298,18 @@ gw2DB.getStartEndDifferences = (record_id) => {
         INNER JOIN
           ref_currencies y
           USING (currency_id)
+          ORDER BY difference ASC
       `).then(res => res[0])
-      .catch((err) => {
 
-      })
   ])
   .then((results) => {
     return {
       items: results[0],
       currencies: results[1],
     }
+  })
+  .catch((err) => {
+
   })
 }
 
@@ -238,10 +320,41 @@ gw2DB.getStartEndDifferences = (record_id) => {
 
 
 
+function whereInFactory(attribute, values) {
+  return (query) => {
+    return query.whereIn(attribute, values)
+  }
+}
 
 
+function itemDetailsQuery(ids) {
+  const filterByIds = (!ids || !ids[0]) ? x => x : whereInFactory('item_id', ids)
 
-
+  return gw2DB.from(
+    filterByIds(gw2DB('ref_items')).as('a')
+  ).joinRaw('NATURAL LEFT JOIN ?',
+    filterByIds(gw2DB.select(gw2DB.raw('item_id, JSON_ARRAYAGG(value) AS flags'))
+      .from ('ref_items_itemflags')
+      .innerJoin('ref_itemflags',
+        'ref_items_itemflags.itemflag_id', 'ref_itemflags.itemflag_id'))
+      .groupBy('item_id')
+    .as('b')
+  ).joinRaw('NATURAL LEFT JOIN ?',
+    filterByIds(gw2DB.select(gw2DB.raw('item_id, JSON_ARRAYAGG(value) AS gametypes'))
+      .from ('ref_items_itemgametypes')
+      .innerJoin('ref_itemgametypes',
+        'ref_items_itemgametypes.itemgametype_id', 'ref_itemgametypes.itemgametype_id'))
+      .groupBy('item_id')
+    .as('c')
+  ).joinRaw('NATURAL LEFT JOIN ?',
+    filterByIds(gw2DB.select(gw2DB.raw('item_id, JSON_ARRAYAGG(value) AS restrictions'))
+      .from ('ref_items_itemrestrictions')
+      .innerJoin('ref_itemrestrictions',
+        'ref_items_itemrestrictions.itemrestriction_id', 'ref_itemrestrictions.itemrestriction_id'))
+      .groupBy('item_id')
+    .as('d')
+  )
+}
 
 
 
@@ -255,33 +368,7 @@ gw2DB.getItemDetails = (ids) => {
     idArray = [ids] //if ids was a single id, make it an array for the query
 
 
-  return gw2DB.from(
-    gw2DB('ref_items').whereIn('item_id', idArray).as('a')
-  ).joinRaw('NATURAL LEFT JOIN ?',
-    gw2DB.select(gw2DB.raw('item_id, JSON_ARRAYAGG(value) AS flags'))
-      .from ('ref_items_itemflags')
-      .innerJoin('ref_itemflags',
-        'ref_items_itemflags.itemflag_id', 'ref_itemflags.itemflag_id')
-      .whereIn('item_id', idArray)
-      .groupBy('item_id')
-    .as('b')
-  ).joinRaw('NATURAL LEFT JOIN ?',
-    gw2DB.select(gw2DB.raw('item_id, JSON_ARRAYAGG(value) AS gametypes'))
-      .from ('ref_items_itemgametypes')
-      .innerJoin('ref_itemgametypes',
-        'ref_items_itemgametypes.itemgametype_id', 'ref_itemgametypes.itemgametype_id')
-      .whereIn('item_id', idArray)
-      .groupBy('item_id')
-    .as('c')
-  ).joinRaw('NATURAL LEFT JOIN ?',
-    gw2DB.select(gw2DB.raw('item_id, JSON_ARRAYAGG(value) AS restrictions'))
-      .from ('ref_items_itemrestrictions')
-      .innerJoin('ref_itemrestrictions',
-        'ref_items_itemrestrictions.itemrestriction_id', 'ref_itemrestrictions.itemrestriction_id')
-      .whereIn('item_id', idArray)
-      .groupBy('item_id')
-    .as('d')
-  )
+  return itemDetailsQuery(idArray)
 }
 
 

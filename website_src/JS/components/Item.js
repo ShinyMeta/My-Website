@@ -26,38 +26,6 @@ export default class Item extends React.Component {
   ////////////////////
   // HELPER METHODS
   ///////////////////
-  // renderImage() {
-  //   let style = {
-  //     float: 'left',
-  //     height: '64px',
-  //     width: '64px',
-  //     position:'relative',
-  //     textAlign:'center',
-  //     fontWeight: 'bold',
-  //     textShadow: '1px 1px black'
-  //   }
-  //   if (!this.props.item) {
-  //     return (<div
-  //         className="Item" item_id = {this.props.item.item_id}
-  //         style={style} onDoubleClick = {this.props.onDoubleClick}>
-  //           {this.renderEmpty()}
-  //       </div>)
-  //   } else if (!this.props.item.item_id) {
-  //     return (<div
-  //         className="Item" item_id = {this.props.item.item_id}
-  //         style={style} onDoubleClick = {this.props.onDoubleClick}>
-  //           {this.renderUnknown()}
-  //       </div>)
-  //   } else {
-  //     return (<div
-  //         className="Item" item_id = {this.props.item.item_id}
-  //         style={style} onDoubleClick = {this.props.onDoubleClick}>
-  //           {this.renderItemImage()}
-  //       </div>)
-  //   }
-  // }
-
-
 
   renderItem() {
     let tool_tip = this.props.item.name
@@ -82,7 +50,7 @@ export default class Item extends React.Component {
       return <div style={{position: 'absolute', top: '2px', right: '2px', color: 'white'}}
                 title={item.count}>{item.count}</div>
     if (item.difference >= 0)
-      return <div style={{position: 'absolute', bottom: '2px', left: '2px', color: '#5dd55d'}}
+      return <div style={{position: 'absolute', bottom: '2px', right: '2px', color: '#5dd55d'}}
                 title={'+'+item.difference}>+{item.difference}</div>
     if (item.difference < 0)
       return <div style={{position: 'absolute', bottom: '2px', right: '2px', color: '#e06c6c'}}
@@ -106,7 +74,7 @@ export default class Item extends React.Component {
       position:'relative',
       textAlign:'center',
       fontWeight: 'bold',
-      textShadow: '1px 1px black'
+      textShadow: '-1px 0 black, 0 1px black, 1px 0 black, 0 -1px black'
     }
     if (!this.props.item) {
       return (<div

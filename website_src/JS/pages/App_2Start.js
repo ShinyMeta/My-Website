@@ -73,6 +73,7 @@ export default class Header extends React.Component {
     //
     this.props.setStartTime(Date.now())
     this.props.history.push('./3-running')
+    this.props.setCurrentStep(3)
   }
 
   onRefreshInventoryClick(e) {
@@ -111,6 +112,18 @@ export default class Header extends React.Component {
           //if we reached this, then all 5 items checked out
           this.setState({swapVerified: true, swapVerifiedMessage: 'VERIFIED'})
         }
+        else {
+          //put any item into slot 3
+          if (new_inventory[2]) {
+            this.setState({swapVerified: true, swapVerifiedMessage: 'VERIFIED'})
+          }
+          else {
+            this.setState({swapVerified: false, swapVerifiedMessage:
+                `The API does not yet reflect the indicated items in your inventory.
+                Double check your bag, or try again in a bit (can take up to 5 minutes to reflect changes)`})
+            return
+          }
+        }
       })
   }
 
@@ -143,35 +156,6 @@ export default class Header extends React.Component {
       .then((inventoryWithDetails) => {
         this.setState({selectedCharacterInventory: inventoryWithDetails, firstFiveUpdated: true})
       })
-
-    // let item_ids = []
-    // let id_indexer = {}
-    // for (let i = 0; i < 5; i++) {
-    //   const item = this.state.selectedCharacterInventory[i]
-    //   //skip null
-    //   if (item){
-    //     //save the indxexer of the id in indexer
-    //     id_indexer[item.id] = i
-    //     item_ids.push(item.id)
-    //   }
-    // }
-    // if (item_ids.length === 0) {
-    //   // all null, all done now
-    //   this.setState({firstFiveUpdated: true})
-    // }
-    // else {
-    //   //we have some ids, now lets request details from server
-    //   axios.get('./itemDetails', {params: {ids: item_ids.toString()}})
-    //     .then((res) => {
-    //       let inventoryCopy = this.state.selectedCharacterInventory.slice()
-    //       const itemDetails = res.data
-    //       itemDetails.forEach((x) => {
-    //         let i = id_indexer[x.item_id]
-    //         inventoryCopy[i] = x
-    //       })
-    //       this.setState({selectedCharacterInventory: inventoryCopy, firstFiveUpdated: true})
-    //     })
-    // }
   }
 
 
@@ -271,7 +255,7 @@ export default class Header extends React.Component {
     if (!this.state.firstFiveUpdated){
       return <Loading />
     }
-    
+
     return (
       <div>
         <div>{`The API shows these items as the first 5 slots in ${this.props.selectedCharacter}'s inventory:`}</div>
@@ -281,7 +265,7 @@ export default class Header extends React.Component {
           <br />
           <br />
           <br />
-        <div>{'To confirm that you are ready to start, rearrange those items to this order:'}</div>
+        <div>{'To confirm that you are ready to start, rearrange those items to this order (put any item in place of \'?\'):'}</div>
       <div>{this.state.reorderType ? this.renderReordered.bind(this)() : <Loading />}</div>
           <br />
         <button onClick = {this.onReorderClick.bind(this)}>Re-shuffle</button>
