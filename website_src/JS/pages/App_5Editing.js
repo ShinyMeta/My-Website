@@ -11,10 +11,10 @@ import Timer from '../components/Timer.js'
 const propTypes = {
   timeElapsed: PropTypes.number,
   differences: PropTypes.object,
-  setDifferences: PropTypes.func.isRequired,
+  setEditedResults: PropTypes.func.isRequired,
   history: PropTypes.object.isRequired,
   setCurrentStep: PropTypes.func.isRequired,
-  
+
 }
 export default class App_5Editing extends React.Component {
   constructor(props) {
@@ -35,22 +35,22 @@ export default class App_5Editing extends React.Component {
 
   onConfirmClick(e) {
     //send back the differences object, but first check each id incase you shouldn't send it
-    let editedDifferences = { items: [], currencies: [] }
+    let editedResults = { items: [], currencies: [] }
     const differences = this.props.differences
     const removed = this.state.removed
 
     differences.items.forEach((item) => {
       if (!removed[item.item_id])
-        editedDifferences.items.push(item)
+        editedResults.items.push(item)
     })
     differences.currencies.forEach((currency) => {
       if (!removed[currency.currency_id])
-        editedDifferences.currencies.push(currency)
+        editedResults.currencies.push(currency)
     })
     //now sending
-    axios.post('/gw2data/editedResultsRecord', editedDifferences)
+    axios.post('/gw2data/editedResultsRecord', editedResults)
       .then(() => {
-        this.props.setDifferences(editedDifferences)
+        this.props.setEditedResults(editedResults)
       })
     this.props.history.push('./6-finish')
     this.props.setCurrentStep(6)

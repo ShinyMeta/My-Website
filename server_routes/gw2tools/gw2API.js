@@ -236,7 +236,7 @@ function addItemsToFullState (newItems, fullStateItems, indexer) {
   newItems.forEach((item) => {
     if (!item) {
       //check for null
-    } else if (indexer[item.id]) {
+    } else if (indexer[item.id] || indexer[item.id] === 0) {
       //we've added this item id already, so we can look it up and add the count
       fullStateItems[indexer[item.id]].quantity += item.count
     } else {

@@ -128,7 +128,7 @@ export default class App_6Finish extends React.Component {
         //salvage requires same rarity, level, subtype   and no 'NoSalvage' flag
         //flushing require same rarity, level, main type and no 'NoMysticForge' flag
       if (firstItem.type === 'Armor' || firstItem.type === 'Weapon'){
-        const isPossible = this.checkArmorWeapon
+        const isPossible = checkArmorWeapon(firstItem, negatives.items)
         if (isPossible.salvage) {
           possibleMethods.push({
             method_type: 'Salvage',
@@ -138,7 +138,7 @@ export default class App_6Finish extends React.Component {
         if (isPossible.flush) {
           possibleMethods.push({
             method_type: 'Mystic Forge',
-            key_element: Object.assign(firstItem, {name: 'Forgable ' + firstItem.type,})
+            key_element: Object.assign({}, firstItem, {name: 'Forgable ' + firstItem.type,})
           })
         }
       }
@@ -164,7 +164,7 @@ export default class App_6Finish extends React.Component {
         //just make sure all of them are the same rarity
         possibleMethods.push({
           method_type: 'Mystic Forge',
-          key_element: Object.assign(firstItem, {name: firstItem.rarity + ' Minis'})
+          key_element: Object.assign({}, firstItem, {name: firstItem.rarity + ' Minis'})
         })
       }
     }
@@ -172,36 +172,8 @@ export default class App_6Finish extends React.Component {
     return {possibleMethods}
   }
 
-  checkArmorWeapon(firstItem, negatives) {
-    const firstDetails = JSON.parse(firstItem.details)
 
-    return negatives.reduce((prev, item) => {
 
-      const details = JSON.parse(item.details)
-
-      const required_for_both = (
-        item.rarity           === firstItem.rarity &&
-        item.level            === firstItem.level
-      )
-
-      return {
-        //check salvage
-        salvage: prev.salvage && required_for_both &&
-          details.type          === firstDetails.type &&
-          details.weight_class  === firstDetails.weight_class &&
-          !this.doesItemContainFlag(item, 'NoSalvage'),
-        //check flush
-        flush: prev.flush && required_for_both &&
-          item.type             === firstItem.type &&
-          !this.doesItemContainFlag(item, 'NoMysticForge')
-      }
-    })
-  }
-
-  doesItemContainFlag(item, flag) {
-    const flags = JSON.parse(item.flags)
-    return flags.find(f => f === flag)
-  }
 
 
   //////////////////////////////////////////////////////////////////////////////
@@ -239,3 +211,38 @@ export default class App_6Finish extends React.Component {
 }
 
 App_6Finish.propTypes = propTypes
+
+
+function checkArmorWeapon(firstItem, items) {
+  const firstDetails = JSON.parse(firstItem.details)
+
+  return items.reduce((prev, item) => {
+
+    const details = JSON.parse(item.details)
+
+    const required_for_both = (
+      item.rarity           === firstItem.rarity &&
+      item.level            === firstItem.level
+    )
+
+    return {
+      //check salvage
+      salvage: prev.salvage && required_for_both &&
+        details.type          === firstDetails.type &&
+        details.weight_class  === firstDetails.weight_class &&
+        !doesItemContainFlag(item, 'NoSalvage'),
+      //check flush
+      flush: prev.flush && required_for_both &&
+        item.type             === firstItem.type &&
+        !doesItemContainFlag(item, 'NoMysticForge')
+    }
+  }, {salvage:true, flush:true})
+}
+
+function doesItemContainFlag(item, flag) {
+  const flags = JSON.parse(item.flags)
+  if (flags)
+    return flags.find(f => f === flag)
+  else
+  return false
+}

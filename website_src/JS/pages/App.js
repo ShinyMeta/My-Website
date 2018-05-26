@@ -36,6 +36,7 @@ export default class App extends React.Component {
     this.setTimeElapsed = this.setTimeElapsed.bind(this)
     this.setEndTime = this.setEndTime.bind(this)
     this.setDifferences = this.setDifferences.bind(this)
+    this.setEditedResults = this.setEditedResults.bind(this)
 
   }
 
@@ -65,6 +66,10 @@ export default class App extends React.Component {
 
   setDifferences(differences){
     this.setState({differences})
+  }
+
+  setEditedResults(editedResults){
+    this.setState({editedResults})
   }
 
 
@@ -218,7 +223,7 @@ export default class App extends React.Component {
               return <App_5Editing {...props} user = {this.props.user}
                 timeElapsed={this.state.timeElapsed}
                 differences={this.state.differences}
-                setDifferences={this.setDifferences}
+                setEditedResults={this.setEditedResults}
                 setCurrentStep = {this.setCurrentStep}
               />
             }} />
