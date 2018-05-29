@@ -52,6 +52,14 @@ export default class App_6Finish extends React.Component {
     }
 
     axios.post('/gw2data/finalizeRecord', finalState)
+      .catch((err) => {
+        if (err.status === 403) {
+          this.props.history.push('./error')
+        }
+        else {
+          console.error(err)
+        }
+      })
     this.props.history.push('/')
     this.props.resetApp()
     this.props.setCurrentStep(0)

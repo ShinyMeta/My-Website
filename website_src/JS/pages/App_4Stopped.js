@@ -39,6 +39,10 @@ export default class App_4Stopped extends React.Component {
     this.setState({selectedCharacterBags: null})
   }
 
+  componentWillUnmount() {
+    clearTimeout(this.state.timer_id)
+  }
+
 
   ////////////////////
   // EVENT HANDLERS
@@ -65,6 +69,14 @@ export default class App_4Stopped extends React.Component {
           .then((res) => {
             //res.data has the currency and item differences between the states, need to set that in state of app
             this.props.setDifferences(res.data)
+          })
+          .catch((err) => {
+            if (err.status === 403) {
+              this.props.history.push('./error')
+            }
+            else {
+              console.error(err)
+            }
           })
       })
 
@@ -95,7 +107,7 @@ export default class App_4Stopped extends React.Component {
         let timer_id = setTimeout(() => {
           gw2MyTools.beep()
           this.getInventory()
-        }, 300000)
+        }, 305000)
         this.setState({selectedCharacterBags: bagsWithDetails, timer_id})
       })
   }

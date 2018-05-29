@@ -39,8 +39,9 @@ export default class Header extends React.Component {
     this.getItemsFromAPI()
   }
 
-
-
+  componentWillUnmount() {
+    clearTimeout(this.state.timer_id)
+  }
 
 
 
@@ -147,7 +148,7 @@ export default class Header extends React.Component {
         let timer_id = setTimeout(() => {
           gw2MyTools.beep()
           this.getItemsFromAPI()
-        }, 300000)
+        }, 305000)
         this.setState(() => {return {selectedCharacterInventory: inventory, timer_id}},
         () => {
           this.getFirstFiveDetails()

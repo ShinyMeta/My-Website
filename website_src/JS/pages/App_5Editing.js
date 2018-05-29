@@ -52,6 +52,14 @@ export default class App_5Editing extends React.Component {
       .then(() => {
         this.props.setEditedResults(editedResults)
       })
+      .catch((err) => {
+        if (err.status === 403) {
+          this.props.history.push('./error')
+        }
+        else {
+          console.error(err)
+        }
+      })
     this.props.history.push('./6-finish')
     this.props.setCurrentStep(6)
   }
@@ -90,7 +98,7 @@ export default class App_5Editing extends React.Component {
 
 
   render() {
-    if (this.props.differences === 'pending') {
+    if (this.props.differences === null) {
       return <Loading />
     }
     return (

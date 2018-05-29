@@ -20,7 +20,7 @@ const default_state = {
   timeElapsed: 0,
   timerInterval: null,
   end_time: 0,
-  differences: 'pending',
+  differences: null,
   editedResults: null
 }
 

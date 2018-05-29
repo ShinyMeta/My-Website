@@ -14,7 +14,7 @@ const propTypes = {
   setEndTime: PropTypes.func.isRequired,
   history: PropTypes.object.isRequired,
   setCurrentStep: PropTypes.func.isRequired,
-  
+
 }
 export default class App_3Running extends React.Component {
   constructor(props) {
@@ -37,6 +37,14 @@ export default class App_3Running extends React.Component {
     //send stop time to server
     const end_time = Date.now()
     axios.post('/gw2data/stopTimeRecord', {end_time})
+      .catch((err) => {
+        if (err.status === 403) {
+          this.props.history.push('./error')
+        }
+        else {
+          console.error(err)
+        }
+      })
     this.props.setEndTime(end_time)
     //move to 4-stopped
     this.props.history.push('./4-stopped')
