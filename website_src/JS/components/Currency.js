@@ -33,20 +33,20 @@ export default class Currency extends React.Component {
   ///////////////////
   renderQuantity() {
     const currency = this.props.currency
-    if (!currency.difference && currency.value > 1)
+    if (!currency.quantity && currency.value > 1)
       return <div style={{position: 'absolute', top: '2px', right: '2px', color: 'white'}}
         title={currency.value}>
         {currency.value}
       </div>
-    if (currency.difference >= 0)
+    if (currency.quantity >= 0)
       return <div style={{position: 'absolute', bottom: '2px', right: '2px', color: '#5dd55d'}}
-        title={'+'+currency.difference}>
-        +{currency.difference}
+        title={'+'+currency.quantity}>
+        +{currency.quantity}
       </div>
-    if (currency.difference < 0)
+    if (currency.quantity < 0)
       return <div style={{position: 'absolute', bottom: '2px', right: '2px', color: '#e06c6c'}}
-        title={currency.difference}>
-        {currency.difference}
+        title={currency.quantity}>
+        {currency.quantity}
       </div>
   }
 

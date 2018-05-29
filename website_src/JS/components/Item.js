@@ -46,15 +46,15 @@ export default class Item extends React.Component {
 
   renderQuantity() {
     const item = this.props.item
-    if (!item.difference && item.count > 1)
+    if (!item.quantity && item.count > 1)
       return <div style={{position: 'absolute', top: '2px', right: '2px', color: 'white'}}
                 title={item.count}>{item.count}</div>
-    if (item.difference >= 0)
+    if (item.quantity >= 0)
       return <div style={{position: 'absolute', bottom: '2px', right: '2px', color: '#5dd55d'}}
-                title={'+'+item.difference}>+{item.difference}</div>
-    if (item.difference < 0)
+                title={'+'+item.quantity}>+{item.quantity}</div>
+    if (item.quantity < 0)
       return <div style={{position: 'absolute', bottom: '2px', right: '2px', color: '#e06c6c'}}
-                title={item.difference}>{item.difference}</div>
+                title={item.quantity}>{item.quantity}</div>
   }
 
   renderEmpty() {
