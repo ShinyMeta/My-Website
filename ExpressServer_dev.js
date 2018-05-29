@@ -53,8 +53,8 @@ let httpsServer = https.createServer(credentials, app)
 
 //http requests with content type application/json will be parsed
 //req.body will be changed to a json object
-app.use(bodyParser.json())
-  .use(bodyParser.urlencoded({extended: false}))
+app.use(bodyParser.json({limit: '50mb'}))
+  .use(bodyParser.urlencoded({limit: '50mb', extended: true}))
 
 // tells the browser to use https if they are on http
   .use(helmet())

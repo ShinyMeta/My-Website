@@ -177,11 +177,11 @@ function castResultStateforDB(resultState) {
   return {
     items: resultState.items.map((item) => ({
           binding: item.binding,
-          quantity: item.difference,
+          quantity: item.quantity,
           item_id: item.item_id,
         })),
     currencies: resultState.currencies.map((currency) => ({
-          quantity: currency.difference,
+          quantity: currency.quantity,
           currency_id: currency.currency_id,
         })),
   }
@@ -256,7 +256,7 @@ gw2DB.getStartEndDifferences = (record_id) => {
   return Promise.all([
     gw2DB.raw(`
       SELECT * FROM
-      (SELECT a.item_id, a.binding, (IFNULL(b.quantity, 0) - a.quantity) difference FROM
+      (SELECT a.item_id, a.binding, (IFNULL(b.quantity, 0) - a.quantity) quantity FROM
         gw2data_start_items a
         LEFT JOIN
         gw2data_end_items b
@@ -265,7 +265,7 @@ gw2DB.getStartEndDifferences = (record_id) => {
         AND (b.quantity IS NULL
         OR a.quantity != b.quantity)
       UNION
-      SELECT b.item_id, b.binding, (b.quantity - IFNULL(a.quantity, 0)) difference FROM
+      SELECT b.item_id, b.binding, (b.quantity - IFNULL(a.quantity, 0)) quantity FROM
         gw2data_start_items a
         RIGHT OUTER JOIN
         gw2data_end_items b
@@ -275,11 +275,11 @@ gw2DB.getStartEndDifferences = (record_id) => {
       INNER JOIN
         ref_items y
         USING (item_id)
-        ORDER BY difference ASC
+        ORDER BY quantity ASC
       `).then(res => res[0]),
       gw2DB.raw(`
         SELECT * FROM
-        (SELECT a.currency_id, (IFNULL(b.quantity, 0) - a.quantity) difference FROM
+        (SELECT a.currency_id, (IFNULL(b.quantity, 0) - a.quantity) quantity FROM
           gw2data_start_currencies a
           LEFT JOIN
           gw2data_end_currencies b
@@ -288,7 +288,7 @@ gw2DB.getStartEndDifferences = (record_id) => {
           AND (b.quantity IS NULL
           OR a.quantity != b.quantity)
         UNION
-        SELECT b.currency_id, (b.quantity - IFNULL(a.quantity, 0)) difference FROM
+        SELECT b.currency_id, (b.quantity - IFNULL(a.quantity, 0)) quantity FROM
           gw2data_start_currencies a
           RIGHT OUTER JOIN
           gw2data_end_currencies b
@@ -298,7 +298,7 @@ gw2DB.getStartEndDifferences = (record_id) => {
         INNER JOIN
           ref_currencies y
           USING (currency_id)
-          ORDER BY difference ASC
+          ORDER BY quantity ASC
       `).then(res => res[0])
 
   ])

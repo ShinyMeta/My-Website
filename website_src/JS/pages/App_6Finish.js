@@ -75,7 +75,7 @@ export default class App_6Finish extends React.Component {
   //////////////////////////////////////////////////////////////////////////////
   // HELPER METHODS
   ///////////////////
-  static detectPossibleMethods(nextProps, prevState) {
+  static detectPossibleMethods(nextProps) {
     //get list of negative currencies and items
     let negatives = {
       items: nextProps.editedResults.items.filter((item) => item.quantity < 0),
@@ -93,16 +93,27 @@ export default class App_6Finish extends React.Component {
     //if negative currency
     if (negatives.currencies[0]) {
       negatives.currencies.forEach((currency) => {
-        possibleMethods.push({
-          method_type: 'Currency',
-          key_element: currency
-        })
+        if (currency.name !== 'Coin'){
+          possibleMethods.push({
+            method_type: 'Currency',
+            key_element: currency
+          })
+        }
       })
     }
 
     //if look at first negative item
     if(negatives.items[0]) {
       let firstItem = negatives.items[0]
+
+
+      //if account/characterbound material
+      if (firstItem.binding && firstItem.type === 'CraftingMaterial') {
+        possibleMethods.push({
+          method_type: 'Account Bound Material',
+          key_element: firstItem
+        })
+      }
       //if container type
       if (firstItem.type === 'Container' && negatives.items.length === 1) {
         possibleMethods.push({

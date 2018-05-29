@@ -26,7 +26,7 @@ export default class App_4Stopped extends React.Component {
       green_salvage: 'copperfed',
       yellow_salvage: 'silverfed',
       magic_find: null,
-
+      timer_id: -1,
     }
   }
 
@@ -46,6 +46,7 @@ export default class App_4Stopped extends React.Component {
 
   onRefreshClick(e) {
     //just do the get inventory
+    clearTimeout(this.state.timer_id)
     this.getInventory()
   }
 
@@ -91,7 +92,11 @@ export default class App_4Stopped extends React.Component {
         return gw2MyTools.fillBagsWithItemDetails(bags)
       })
       .then((bagsWithDetails) => {
-        this.setState({selectedCharacterBags: bagsWithDetails})
+        let timer_id = setTimeout(() => {
+          gw2MyTools.beep()
+          this.getInventory()
+        }, 300000)
+        this.setState({selectedCharacterBags: bagsWithDetails, timer_id})
       })
   }
 

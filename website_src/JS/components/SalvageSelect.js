@@ -42,6 +42,7 @@ export default class SalvageSelect extends React.Component {
         <div><select defaultValue={this.props.default} onChange={this.props.onChange}
             name={this.props.name}
           >
+          <option value="none">No Salvage</option>
           <option value="crude">Crude Salvage Kit</option>
           <option value="copperfed">Copper-Fed/Basic Salvage Kit</option>
           <option value="fine">Fine Salvage Kit</option>
