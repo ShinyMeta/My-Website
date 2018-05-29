@@ -13,19 +13,21 @@ import App_5Editing from './App_5Editing.js'
 import App_6Finish from './App_6Finish.js'
 import Loading from '../components/Loading.js'
 
+const default_state = {
+  selectedCharacter: null,
+  currentStep: 'pending',
+  start_time: 'pending',
+  timeElapsed: 0,
+  timerInterval: null,
+  end_time: 0,
+  differences: 'pending',
+  editedResults: null
+}
+
 export default class App extends React.Component {
   constructor(props) {
     super(props)
-    this.state = {
-      selectedCharacter: null,
-      currentStep: 'pending',
-      start_time: 'pending',
-      timeElapsed: 0,
-      timerInterval: null,
-      end_time: 0,
-      differences: 'pending',
-      editedResults: null
-    }
+    this.state = default_state
 
 
     //functions to passdown
@@ -37,6 +39,7 @@ export default class App extends React.Component {
     this.setEndTime = this.setEndTime.bind(this)
     this.setDifferences = this.setDifferences.bind(this)
     this.setEditedResults = this.setEditedResults.bind(this)
+    this.resetApp = this.resetApp.bind(this)
 
   }
 
@@ -72,6 +75,11 @@ export default class App extends React.Component {
     this.setState({editedResults})
   }
 
+
+  resetApp(){
+    this.setState(default_state)
+    this.getCurrentStep
+  }
 
 
 
@@ -232,6 +240,7 @@ export default class App extends React.Component {
                 timeElapsed={this.state.timeElapsed}
                 editedResults={this.state.editedResults}
                 setCurrentStep = {this.setCurrentStep}
+                resetApp = {this.resetApp}
               />
             }} />
           <Route component={_404page} />

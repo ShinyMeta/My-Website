@@ -26,6 +26,7 @@ export default class Header extends React.Component {
       reorderType: null, //"allNull" or "swap"
       swapVerified: false,
       swapVerifiedMessage: '',
+      timer_id: -1,
     }
   }
 
@@ -82,6 +83,7 @@ export default class Header extends React.Component {
       return default_state
     })
     // get items from API again
+    clearTimeout(this.state.timer_id)
     this.getItemsFromAPI()
   }
 
@@ -142,7 +144,11 @@ export default class Header extends React.Component {
   getItemsFromAPI() {
     GW2API.characterInventory(this.props.user.apikey, this.props.selectedCharacter)
       .then((inventory) => {
-        this.setState(() => {return {selectedCharacterInventory: inventory}},
+        let timer_id = setTimeout(() => {
+          gw2MyTools.beep()
+          this.getItemsFromAPI()
+        }, 300000)
+        this.setState(() => {return {selectedCharacterInventory: inventory, timer_id}},
         () => {
           this.getFirstFiveDetails()
           this.rearrangeFirstFive()

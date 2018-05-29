@@ -11,6 +11,7 @@ const propTypes = {
   timeElapsed: PropTypes.number.isRequired,
   history: PropTypes.object.isRequired,
   setCurrentStep: PropTypes.func.isRequired,
+  resetApp: PropTypes.func.isRequired,
 
 }
 export default class App_6Finish extends React.Component {
@@ -52,6 +53,7 @@ export default class App_6Finish extends React.Component {
 
     axios.post('/gw2data/finalizeRecord', finalState)
     this.props.history.push('/')
+    this.props.resetApp()
     this.props.setCurrentStep(0)
   }
 
