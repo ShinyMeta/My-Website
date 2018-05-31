@@ -13,7 +13,8 @@ module.exports = {
   },
   output: {
     path: path.resolve(__dirname, 'website_public/gw2data'),
-    filename: './[name].bundle.js'
+    filename: '[name].bundle.js',
+    publicPath: '/gw2data/'
   },
   module: {
     rules: [
@@ -34,7 +35,7 @@ module.exports = {
     new HtmlWebpackPlugin({
       template: 'HTML/gw2data.html'
     })
-    
+
   ],
   target: 'node',
   node: {
