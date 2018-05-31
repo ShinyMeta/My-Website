@@ -219,7 +219,7 @@ export default class Report_GoldFarmDetails extends React.Component {
       const item = Object.assign({}, combined_records.item_rows[item_id],
             report_obj.indexer.items[item_id])
       const gold_per_hour = item.selected_choice.value*item.quantity/(time/3600000)
-      total_gph += gold_per_hour.toFixed(0)
+      total_gph += gold_per_hour
       item_rows.push(<tr key={item_id}>
         <td><Item item={item}/></td>
         <td>{item.name}</td>
@@ -235,7 +235,7 @@ export default class Report_GoldFarmDetails extends React.Component {
       <td>TOTAL</td>
       <td></td>
       <td></td>
-      <td>{(total_gph/10000)}</td>
+      <td>{(total_gph/10000).toFixed(4)}</td>
     </tr>)
 
 
