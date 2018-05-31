@@ -235,7 +235,7 @@ export default class Report_GoldFarmDetails extends React.Component {
       <td>TOTAL</td>
       <td></td>
       <td></td>
-      <td>{(total_gph./10000)}</td>
+      <td>{(total_gph/10000)}</td>
     </tr>)
 
 
