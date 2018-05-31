@@ -48,7 +48,7 @@
     "start": "npm run build && npm run production",
     "dev": "SET NODE_ENV=development&nodemon --exec babel-node ExpressServer_dev.js",
     "dev2": "SET NODE_ENV=development&babel-node ExpressServer_dev.js",
-    "production": "SET NODE_ENV=production&node ExpressServer.js",
+    "production": "SET NODE_ENV=production&babel-node ExpressServer.js",
     "build:server": "babel ExpressServer_dev.js --out-file ExpressServer.js",
     "build:client": "webpack -p --config webpack.prod.config.js --progress",
     "build": "better-npm-run build"
