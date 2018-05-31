@@ -41,7 +41,7 @@ module.exports = GW2API
 GW2API.currencies = (ids) => {
   let options = {}
   if (ids) {
-    options.params = {ids}
+    options.params = {ids: ids.toString()}
   }
   return GW2API.get('/currencies', options)
     .then((res) => {
@@ -53,7 +53,7 @@ GW2API.currencies = (ids) => {
 GW2API.items = (ids) => {
   let options = {}
   if (ids) {
-    options.params = {ids}
+    options.params = {ids: ids.toString()}
   }
   return GW2API.get('/items', options)
     .then((res) => {
@@ -103,7 +103,8 @@ GW2API.characters = (access_token, requestDetails) => {
 
 GW2API.character = (access_token, character) => {
   // https://api.guildwars2.com/v2/characters/Cinderred?access_token=D2B5389F-F40A-4547-9D2C-FAC66DACEB63374FC165-8917-4A24-9DB0-74602CBF4253
-  return GW2API.get('/characters/' + character, {params:{access_token}})
+  const params = {access_token, anti_cache: Date.now()}
+  return GW2API.get('/characters/' + character, {params})
     .then((res) => {
       return res.data
     })
@@ -124,6 +125,38 @@ GW2API.materials = (access_token) => {
       return res.data
     })
 }
+
+
+GW2API.tradingPost = (ids) => {
+  // /commerce/prices(?ids=1,2,3...200)
+  return GW2API.get('/commerce/prices', {params: {ids: ids.toString()}})
+    .then((res) => {
+      return res.data
+    })
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -72,7 +72,7 @@ export default class App_4Stopped extends React.Component {
           })
           .catch((err) => {
             if (err.status === 403) {
-              this.props.history.push('./error')
+              this.props.history.push('/error')
             }
             else {
               console.error(err)
@@ -80,7 +80,7 @@ export default class App_4Stopped extends React.Component {
           })
       })
 
-    this.props.history.push('./5-editing')
+    this.props.history.push('/makeRecord/5-editing')
     this.props.setCurrentStep(5)
 
   }

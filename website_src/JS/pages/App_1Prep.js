@@ -21,7 +21,7 @@ export default class App_1Prep extends React.Component {
     this.props.setSelectedCharacter(character)
   }
   onClick(e) {
-    this.props.history.push('./2-start')
+    this.props.history.push('/makeRecord/2-start')
   }
 
 

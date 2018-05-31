@@ -62,11 +62,11 @@ export default class Header extends React.Component {
           class: characterDetails.profession,
           level: characterDetails.level
         }
-        return axios.post('./startRecord', startingState)
+        return axios.post('/gw2data/startRecord', startingState)
       })
       .catch((err) => {
         if (err.status === 403) {
-          this.props.history.push('./error')
+          this.props.history.push('/error')
         }
         else {
           console.error(err)
@@ -74,7 +74,7 @@ export default class Header extends React.Component {
       })
     //
     this.props.setStartTime(Date.now())
-    this.props.history.push('./3-running')
+    this.props.history.push('/makeRecord/3-running')
     this.props.setCurrentStep(3)
   }
 

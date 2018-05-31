@@ -54,7 +54,7 @@ export default class App_6Finish extends React.Component {
     axios.post('/gw2data/finalizeRecord', finalState)
       .catch((err) => {
         if (err.status === 403) {
-          this.props.history.push('./error')
+          this.props.history.push('/error')
         }
         else {
           console.error(err)
@@ -221,8 +221,9 @@ export default class App_6Finish extends React.Component {
         <h4>Select the method used during the recording:</h4>
         <button type="button" onClick={this.onSaveClick.bind(this)}>Save Record</button>
         {this.state.possibleMethods[this.state.selectedMethodIndex].method_type === 'Farming'?
+          (<div>Enter the nick-name or a brief description of your method (e.g. RIBA, map event rewards, leather farm, champ bags)
           <FarmingMethodInputs onSelectChange={this.handleSelectChange.bind(this)}
-                          onTextChange={this.handleTextChange.bind(this)} />      : ''}
+                          onTextChange={this.handleTextChange.bind(this)} /></div>)      : ''}
           <br />
         {this.renderMethods()}
 

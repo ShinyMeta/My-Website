@@ -371,15 +371,91 @@ gw2DB.getItemDetails = (ids) => {
   return itemDetailsQuery(idArray)
 }
 
+gw2DB.getItemDetailsAsObject = (ids) => {
+  return gw2DB.getItemDetails(ids)
+    .then((itemDetailsArray) => {
+      const itemDetailsObject = {}
+      itemDetailsArray.forEach((item) => {
+        itemDetailsObject[item.item_id] = item
+      })
+      return itemDetailsObject
+    })
+
+}
 
 
 
 
+gw2DB.getCurrencyDetails = (ids) => {
+  let idArray
+  if (Array.isArray(ids))
+    idArray = ids
+  else
+    idArray = [ids] //if ids was a single id, make it an array for the query
+
+
+  return gw2DB('ref_currencies').whereIn('currency_id', idArray)
+}
+
+gw2DB.getCurrencyDetailsAsObject = (ids) => {
+  return gw2DB.getCurrencyDetails(ids)
+    .then((currencyDetailsArray) => {
+      const currencyDetailsObject = {}
+      currencyDetailsArray.forEach((currency) => {
+        currencyDetailsObject[currency.currency_id] = currency
+      })
+      return currencyDetailsObject
+    })
+
+}
 
 
 
 
-
+//
+// gw2DB.fillItemDetails = (items) => {
+//   //if items is actually an array of bags
+//   if (items[0] && items[0].inventory){
+//     return this.fillBagsWithItemDetails(items)
+//   }
+//
+//   //create indexer and ids array
+//   let indexer = {}
+//   let ids = []
+//   createItemsIndexer(items, indexer, ids)
+//
+//   //get details from server, then merge them into ids
+//   return this.getItemDetailsFromServer(ids)
+//     .then((itemDetails) => {
+//       return mergeItemDetails(items, itemDetails, indexer)
+//     })
+// },
+//
+//
+//
+// const createItemsIndexer = (items, indexer, ids) => {
+//   items.forEach((item, index) => {
+//     if (item) {
+//       //check if id already in indexer
+//       if (!indexer[item.id]) {
+//         //add to ids and indexer
+//         indexer[item.id] = []
+//         ids.push(item.id)
+//       }
+//       indexer[item.id].push(index)
+//     }
+//   })
+// }
+//
+// const mergeItemDetails = (items, itemDetails, indexer) => {
+//   //go through each itemDetail, and merge it with every item via indexer
+//   itemDetails.forEach((itemDetail) => {
+//     indexer[itemDetail.item_id].forEach((index) => {
+//       Object.assign(items[index], itemDetail)
+//     })
+//   })
+//   return items
+// }
 
 
 

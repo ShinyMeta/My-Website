@@ -12,10 +12,11 @@ import App_4Stopped from './App_4Stopped.js'
 import App_5Editing from './App_5Editing.js'
 import App_6Finish from './App_6Finish.js'
 import Loading from '../components/Loading.js'
+import Reports from './Reports.js'
 
 const default_state = {
   selectedCharacter: null,
-  currentStep: 'pending',
+  currentStep: null,
   start_time: 'pending',
   timeElapsed: 0,
   timerInterval: null,
@@ -89,7 +90,12 @@ export default class App extends React.Component {
 
   componentDidMount() {
     //make request to server to get current data
-    this.getCurrentStep()
+    const path_prefix = this.props.location.pathname.substring(0, 11)
+    console.log(path_prefix)
+    if (path_prefix === '/makeRecord')
+      this.getCurrentStep()
+    else
+      this.setState({currentStep: 0})
   }
 
 
@@ -99,6 +105,7 @@ export default class App extends React.Component {
   ////////////////////
   // EVENT HANDLERS
   ///////////////////
+
 
   onLogoutClick(e) {
     //send logout to server to destroy session
@@ -145,32 +152,33 @@ export default class App extends React.Component {
         const {currentStep, selectedCharacter, start_time, end_time, differences, editedResults} = res.data
         switch(currentStep) {
           case 0:
-            this.setState({currentStep},
-              () => this.props.history.push('./'))
+            this.setState({currentStep})
+            if (this.props.location.pathname !== '/')
+            this.props.history.push('/makeRecord/1-prep')
             break
           case 3:
             this.setState({currentStep, selectedCharacter, start_time: Date.parse(start_time)},
-              () => this.props.history.push('./3-running'))
+              () => this.props.history.push('/makeRecord/3-running'))
             break
           case 4:
             this.setState({currentStep, selectedCharacter,
                   start_time: Date.parse(start_time), end_time: Date.parse(end_time),
                   timeElapsed: Date.parse(end_time) - Date.parse(start_time)},
-              () => this.props.history.push('./4-stopped'))
+              () => this.props.history.push('/makeRecord/4-stopped'))
             break
           case 5:
             this.setState({currentStep, selectedCharacter,
                   start_time: Date.parse(start_time), end_time: Date.parse(end_time),
                   timeElapsed: Date.parse(end_time) - Date.parse(start_time),
                   differences},
-              () => this.props.history.push('./5-editing'))
+              () => this.props.history.push('/makeRecord/5-editing'))
             break
           case 6:
             this.setState({currentStep, selectedCharacter,
                   start_time: Date.parse(start_time), end_time: Date.parse(end_time),
                   timeElapsed: Date.parse(end_time) - Date.parse(start_time),
                   editedResults},
-              () => this.props.history.push('./6-finish'))
+              () => this.props.history.push('/makeRecord/6-finish'))
             break
 
         }
@@ -181,7 +189,7 @@ export default class App extends React.Component {
 
 
   render() {
-    if (this.state.currentStep === 'pending'){
+    if (this.state.currentStep === null){
       return <Loading />
     }
 
@@ -195,20 +203,20 @@ export default class App extends React.Component {
           <br />
         <Switch>
           <Route exact path="/" component = {App_0Begin}/>
-          <Route path="/1-prep" render = {(props) => {
+          <Route path="/makeRecord/1-prep" render = {(props) => {
               return <App_1Prep {...props} user = {this.props.user}
                 selectedCharacter={this.state.selectedCharacter}
                 setSelectedCharacter={this.setSelectedCharacter}
               />
             }} />
-          <Route path="/2-start" render = {(props) => {
+          <Route path="/makeRecord/2-start" render = {(props) => {
               return <App_2Start {...props} user = {this.props.user}
                 selectedCharacter={this.state.selectedCharacter}
                 setStartTime = {this.setStartTime}
                 setCurrentStep = {this.setCurrentStep}
               />
             }} />
-          <Route path="/3-running" render = {(props) => {
+          <Route path="/makeRecord/3-running" render = {(props) => {
               return <App_3Running {...props} user = {this.props.user}
                 start_time = {this.state.start_time}
                 timeElapsed = {this.state.timeElapsed}
@@ -219,7 +227,7 @@ export default class App extends React.Component {
                 setCurrentStep = {this.setCurrentStep}
               />
             }} />
-          <Route path="/4-stopped" render = {(props) => {
+          <Route path="/makeRecord/4-stopped" render = {(props) => {
               return <App_4Stopped {...props} user = {this.props.user}
                 selectedCharacter={this.state.selectedCharacter}
                 setDifferences={this.setDifferences}
@@ -227,7 +235,7 @@ export default class App extends React.Component {
                 setCurrentStep = {this.setCurrentStep}
               />
             }} />
-          <Route path="/5-editing" render = {(props) => {
+          <Route path="/makeRecord/5-editing" render = {(props) => {
               return <App_5Editing {...props} user = {this.props.user}
                 timeElapsed={this.state.timeElapsed}
                 differences={this.state.differences}
@@ -235,7 +243,7 @@ export default class App extends React.Component {
                 setCurrentStep = {this.setCurrentStep}
               />
             }} />
-          <Route path="/6-finish" render = {(props) => {
+          <Route path="/makeRecord/6-finish" render = {(props) => {
               return <App_6Finish {...props} user = {this.props.user}
                 timeElapsed={this.state.timeElapsed}
                 editedResults={this.state.editedResults}
@@ -243,6 +251,8 @@ export default class App extends React.Component {
                 resetApp = {this.resetApp}
               />
             }} />
+          <Route path="/reports" component = {Reports}/>
+
           <Route component={_404page} />
         </Switch>
       </div>

@@ -36,7 +36,6 @@ export default class FarmingMethodInputs extends React.Component {
   render() {
     return (
       <div>
-        <div>Enter the nick-name or a brief description of your method (e.g. RIBA, map event rewards, leather farm, champ bags)</div>
         <input type="text" onChange={this.props.onTextChange} />
 
         <select defaultValue='default' onChange={this.props.onSelectChange}>

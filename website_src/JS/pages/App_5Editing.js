@@ -54,13 +54,13 @@ export default class App_5Editing extends React.Component {
       })
       .catch((err) => {
         if (err.status === 403) {
-          this.props.history.push('./error')
+          this.props.history.push('/error')
         }
         else {
           console.error(err)
         }
       })
-    this.props.history.push('./6-finish')
+    this.props.history.push('/makeRecord/6-finish')
     this.props.setCurrentStep(6)
   }
 

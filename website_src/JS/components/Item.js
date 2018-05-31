@@ -4,6 +4,7 @@ import React from 'react'
 const propTypes = {
   item: PropTypes.any,
   onDoubleClick: PropTypes.func,
+  noQuantity: PropTypes.bool,
 }
 export default class Item extends React.Component {
   constructor(props) {
@@ -45,6 +46,7 @@ export default class Item extends React.Component {
   }
 
   renderQuantity() {
+    if (this.props.noQuantity) {return}
     const item = this.props.item
     if (!item.quantity && item.count > 1)
       return <div style={{position: 'absolute', top: '2px', right: '2px', color: 'white'}}
@@ -58,11 +60,11 @@ export default class Item extends React.Component {
   }
 
   renderEmpty() {
-    return <img src="../Images/gw2data/empty_item_slot.png" title="Empty"/>
+    return <img src="/Images/gw2data/empty_item_slot.png" title="Empty"/>
   }
 
   renderUnknown() {
-    return <img src="../Images/gw2data/unknown_item_slot.png" title="Unknown item"/>
+    return <img src="/Images/gw2data/unknown_item_slot.png" title="Unknown item"/>
   }
 
 

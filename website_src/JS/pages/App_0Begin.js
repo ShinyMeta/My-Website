@@ -4,15 +4,22 @@ import { Redirect } from 'react-router-dom'
 
 export default class Header extends React.Component {
 
-  onClick() {
-    this.props.history.push('/1-prep')
+  onReportsClick() {
+    this.props.history.push('/reports')
   }
+
+  onBeginClick() {
+    this.props.history.push('/makeRecord/1-prep')
+  }
+
 
   render() {
     return (
       <div>
-        <h4>To begin:</h4>
-        <button type="button" onClick={this.onClick.bind(this)}>Click here</button>
+        <h4>To start or resume making a record:</h4>
+        <button type="button" onClick={this.onBeginClick.bind(this)}>Click here</button>
+        <h4>To view reports:</h4>
+        <button type="button" onClick={this.onReportsClick.bind(this)}>Click here</button>
         {/* <Redirect to="/1-prep" /> */}
       </div>
     )

@@ -57,7 +57,7 @@ export default class MethodThumbnail extends React.Component {
     switch(method.method_type) {
 
       case 'Farming':
-      return <img src="../Images/gw2data/farming.png"
+      return <img src="/Images/gw2data/farming.png"
           style={{height: '64px', width: '64px', float: 'left'}} />
 
       case 'Currency':

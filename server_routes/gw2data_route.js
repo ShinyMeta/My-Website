@@ -8,7 +8,9 @@ const passport = require('passport')
     require('./gw2tools/passport.js')
 const RedisStore = require('connect-redis')(session)
 
-let DB = require('./gw2tools/gw2DB.js')
+const DB = require('./gw2tools/gw2DB.js')
+import gw2dataReportBuilder from './gw2dataModules/gw2dataReportBuilder'
+const reportBuilder = new gw2dataReportBuilder(DB)
 
 
 module.exports = router;
@@ -51,6 +53,35 @@ router
         res.json(itemDetails)
       })
   })
+
+
+  .get('/report', (req, res, next) => {
+    const {map, strategy_nickname} = req.query
+
+    if (!map) {
+      //return main Farming report
+    }
+
+    reportBuilder.getFarmReport(map, strategy_nickname)
+      .then((report_obj) => {
+        res.json(report_obj)
+      })
+      .catch((err) => console.error(err))
+
+
+  })
+
+
+
+
+
+
+
+
+
+
+
+
 
   .get('/currentStep', (req, res, next) => {
     DB.getActiveRecordByUser(req.user.user_id)

@@ -39,7 +39,7 @@ export default class App_3Running extends React.Component {
     axios.post('/gw2data/stopTimeRecord', {end_time})
       .catch((err) => {
         if (err.status === 403) {
-          this.props.history.push('./error')
+          this.props.history.push('/error')
         }
         else {
           console.error(err)
@@ -47,7 +47,7 @@ export default class App_3Running extends React.Component {
       })
     this.props.setEndTime(end_time)
     //move to 4-stopped
-    this.props.history.push('./4-stopped')
+    this.props.history.push('/makeRecord/4-stopped')
     this.props.setCurrentStep(4)
 
   }
