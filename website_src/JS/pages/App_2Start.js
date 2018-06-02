@@ -16,7 +16,7 @@ const default_state = {
   swapVerifiedMessage: '',
 }
 
-export default class Header extends React.Component {
+export default class App_2Start extends React.Component {
   constructor(props) {
     super(props)
     this.state = {

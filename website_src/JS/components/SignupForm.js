@@ -92,8 +92,8 @@ export default class SignupForm extends React.Component {
     //send request to gw2 api
     this.setState(() => ({apikeyMessage: 'Verifying...'}))
     gw2API.apikeyInfo(this.state.apikey)
-      .then((res) => {
-        const permissions = res.data.permissions
+      .then((token_info) => {
+        const permissions = token_info.permissions
         let wallet = permissions.find((x) => x == 'wallet')
         let inventories = permissions.find((x) => x == 'inventories')
         let characters = permissions.find((x) => x == 'characters')
@@ -121,7 +121,7 @@ export default class SignupForm extends React.Component {
 
   render() {
     if (this.props.user != null) {
-      return <Redirect to = '/app' />
+      return <Redirect to = '/' />
     }
 
     return (
