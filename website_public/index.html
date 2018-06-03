@@ -3,34 +3,55 @@
 <head>
     <title>My webpage</title>
     <link type="text/css"; rel="stylesheet"; href="CSS/index.css">
+    <script src="JS/index.js"></script>
 </head>
 
 <body>
+  <div id="header">
+    <h1>Zachary Swalberg</h1>
+  </div>
 
-  <div id = "sidebar">
-    <h2><u>Links</u></h2>
-    <p><a href = "https://standardresume.co/zacharyswalberg">Resume</a></p>
-    <p><a href = "https://github.com/ShinyMeta">My github</a></p>
-    <h2><u>Projects</u></h2>
-    <p><a href = "game">Breakout Javascript Game</a>
-    <p><a href = "LoyaltyCalc">GW2 Chest of Loyalty Calculator</a></p>
-    <p><a href = "gw2data">GW2 Data Recorder</a></p>
+  <div id = "navigation_bar">
 
+    <div class="dropdown">
+      <button onclick="dropdownClick(this)" class="dropdownButton">Links</button>
+      <div id="links" class="dropdownContent">
+        <a href = "https://standardresume.co/zacharyswalberg">Resume</a>
+        <a href = "https://www.linkedin.com/in/zach-swalberg/">Linkedin</a>
+        <a href = "https://github.com/ShinyMeta">Github</a>
+      </div>
+    </div>
+
+    <div class="dropdown">
+      <button onclick="dropdownClick(this)" class="dropdownButton">Projects</button>
+      <div id="projects" class="dropdownContent">
+        <a href = "game">Breakout Javascript Game</a>
+        <a href = "LoyaltyCalc">GW2 Chest of Loyalty Calculator</a>
+        <a href = "gw2data">GW2 Data Recorder</a>
+      </div>
+    </div>
 
   </div>
 
 
-  <h1>Zachary Swalberg</h1>
-  <a href="Images/itsme.png"><img src="Images/itsme.png"></a>
-  <p>
-    There's going to be a lot of random stuff here for a while.
-  </p>
-  <p>
-    Or you could just go browse Reddit.
-  </p>
-  <p>
-    <a href="https://www.reddit.com/">Meh.</a>
-  </p>
+
+
+  <div id="about"  class="center">
+    <img src="Images/itsme.png" id="portrait" class="center" />
+
+    <p>
+      Hi there, I'm Zach.  I'm a programing enthusiast who likes to have fun with code.  I'm 24 years old, and currently living in the Columbus, Ohio area
+    </p>
+    <p>
+      I started programming when I was 13 years old, with a small Pokemon fansite hosted on Yahoo Geocities.
+      Since then I've gone on to study Computer Science at Brigham Young University, and continue to learn as I develop my own passion projects
+    </p>
+    <p>
+      My most recent work has been with HTML, JavaScript/Node.js and its frameworks/libraries(Express.js, React) and relational database management with MySQL.
+      I also have experience with C++, Java
+    </p>
+
+  </div>
 
 
 
