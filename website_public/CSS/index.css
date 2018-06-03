@@ -48,19 +48,19 @@ body {
 
 /* the dropdown menu div */
 .dropdownContent {
-  display: none;
   position: absolute;
-  min-width: 200px
+  display: none;
+  background-color: #cecece;
+  color: #34657d;
+  min-width: 200px;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
 }
 
 /* links in the dropdown */
-.dropdownContent a {
+.dropdownContent a, .dropdownContent span {
   text-decoration: none;
-  background-color: #cecece;
-  color: #34657d;
-  display: block;
   padding: 15px 15px;
-  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  display: block;
 }
 
 .dropdownContent a:hover {
