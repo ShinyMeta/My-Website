@@ -2,11 +2,18 @@
 let activeDropdown = null
 
 function dropdownClick(e) {
-  if (activeDropdown && activeDropdown != e.nextSibling.nextSibling) {
+  if (activeDropdown && activeDropdown === e.nextSibling.nextSibling) {
+    activeDropdown.classList.toggle('show')
+    activeDropdown = null
+  }
+  else {
+    if (activeDropdown && activeDropdown !== e.nextSibling.nextSibling) {
+      activeDropdown.classList.toggle('show')
+    }
+    activeDropdown = e.nextSibling.nextSibling
     activeDropdown.classList.toggle('show')
   }
-  activeDropdown = e.nextSibling.nextSibling
-  activeDropdown.classList.toggle('show')
+
 }
 
 window.onclick = (e) => {
