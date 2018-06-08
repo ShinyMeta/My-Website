@@ -3,15 +3,21 @@
     font-family: Arial;/**/
 }
 
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
 
-div {
+
+/* div {
     border-radius:5px;
 }
 
 
 #header {
     height: 50px;
-    width: 99%;/**/
+    width: 99%;
     box-sizing: border-box;
 
     position: fixed;
@@ -38,7 +44,7 @@ div {
 
 
 .left {
-    height: 950px;/**/
+    height: 950px;
     width: 12%;
     background-color: lightblue;
     float:left;
@@ -47,7 +53,7 @@ div {
 }
 
 .right {
-    height: 950px;/**/
+    height: 950px;
     width: 86%;
     float:right;
 
@@ -103,4 +109,4 @@ div {
     font-size: 20;
 
 
-}
+} */
