@@ -142,7 +142,7 @@ gw2DB.storeFinalState = (finalState, record) => {
   if (method_type === 'Currency') {
     key_element_id = key_element.currency_id
   }
-  else if (method_type !== 'Farming') {
+  else if (key_element.item_id) {
     key_element_id = key_element.item_id
   }
   return gw2DB('gw2data_records')
@@ -151,7 +151,15 @@ gw2DB.storeFinalState = (finalState, record) => {
       status: 'saved',
       method_type: finalState.method.method_type,
       key_element: key_element_id,
-      map, strategy_nickname
+      //goldfarming tags, will be null/undefined otherwise
+      map,
+      strategy_nickname,
+      //general equip columns, will be null/undefined otherwise
+      upgrade1_rarity: finalState.method.upgrade1_rarity,
+      upgrade1_element: finalState.method.upgrade1_element,
+      upgrade2_rarity: finalState.method.upgrade2_rarity,
+      upgrade2_element: finalState.method.upgrade2_element
+
     })
     .catch ((err) => {
       console.error(err)
@@ -179,6 +187,7 @@ function castResultStateforDB(resultState) {
           binding: item.binding,
           quantity: item.quantity,
           item_id: item.item_id,
+          upgrades: (item.upgrades)?item.upgrades.map((x) => x.item_id):null,
         })),
     currencies: resultState.currencies.map((currency) => ({
           quantity: currency.quantity,
@@ -231,7 +240,8 @@ gw2DB.getEditedResults = (record_id) => {
   return Promise.all([
     gw2DB('gw2data_result_items').where('record_id', record_id)
       .innerJoin(itemDetailsQuery().as('b'),
-          'gw2data_result_items.item_id', 'b.item_id'),
+          'gw2data_result_items.item_id', 'b.item_id')
+          .then(fillUpgradeDetails),
     gw2DB('gw2data_result_currencies').where('record_id', record_id)
       .innerJoin('ref_currencies',
           'gw2data_result_currencies.currency_id', 'ref_currencies.currency_id'),
@@ -253,63 +263,139 @@ gw2DB.getStartEndDifferences = (record_id) => {
   //where start qty != end qty/ either is null
   //and where record_id
 
+
   return Promise.all([
+    gw2DB(gw2DB('gw2data_start_items AS a').leftJoin('gw2data_end_items AS b', (join) => {
+      // console.log('test')
+      // console.trace()
+      let test = join
+      let test2 = join.on
+      join.on('a.item_id', '=', 'b.item_id')
+      join.andOn('a.record_id', '=', 'b.record_id')
+      join.andOn((join) => {
+        join.on('a.upgrades', '=', 'b.upgrades')
+        join.orOn((join) => {
+          join.onNull('a.upgrades')
+          join.onNull('b.upgrades')
+        })
+      })
+    }).select('a.item_id', 'a.binding', 'a.upgrades', gw2DB.raw('(IFNULL(b.quantity, 0) - a.quantity) AS quantity'))
+      .whereRaw(
+        `a.record_id = ${record_id} AND (b.quantity IS NULL OR a.quantity != b.quantity)`
+      )
+  
+    .union(
+  
+    gw2DB('gw2data_start_items AS a').rightOuterJoin('gw2data_end_items AS b', (join) => {
+      join.on('a.item_id', '=', 'b.item_id')
+      join.andOn('a.record_id', '=', 'b.record_id')
+      join.andOn((join) => {
+        join.on('a.upgrades', '=', 'b.upgrades')
+        join.orOn((join) => {
+          join.onNull('a.upgrades')
+          join.onNull('b.upgrades')
+        })
+      })
+    }).select('b.item_id', 'b.binding', 'b.upgrades', gw2DB.raw('(b.quantity - IFNULL(a.quantity, 0)) AS quantity'))
+    .whereRaw(
+      `b.record_id = ${record_id} AND a.quantity IS NULL`
+    )
+    ).as('x'))
+    .innerJoin(itemDetailsQuery().as('y'),
+        'x.item_id', 'y.item_id')
+    .then(fillUpgradeDetails)
+
+    ,
     gw2DB.raw(`
       SELECT * FROM
-      (SELECT a.item_id, a.binding, (IFNULL(b.quantity, 0) - a.quantity) quantity FROM
-        gw2data_start_items a
+      (SELECT a.currency_id, (IFNULL(b.quantity, 0) - a.quantity) quantity FROM
+        gw2data_start_currencies a
         LEFT JOIN
-        gw2data_end_items b
-        ON (a.item_id = b.item_id AND a.record_id = b.record_id)
+        gw2data_end_currencies b
+        ON (a.currency_id = b.currency_id AND a.record_id = b.record_id)
         WHERE a.record_id = ${record_id}
         AND (b.quantity IS NULL
         OR a.quantity != b.quantity)
       UNION
-      SELECT b.item_id, b.binding, (b.quantity - IFNULL(a.quantity, 0)) quantity FROM
-        gw2data_start_items a
+      SELECT b.currency_id, (b.quantity - IFNULL(a.quantity, 0)) quantity FROM
+        gw2data_start_currencies a
         RIGHT OUTER JOIN
-        gw2data_end_items b
-        ON (a.item_id = b.item_id AND a.record_id = b.record_id)
+        gw2data_end_currencies b
+        ON (a.currency_id = b.currency_id AND a.record_id = b.record_id)
         WHERE b.record_id = ${record_id}
         AND a.quantity IS NULL) x
       INNER JOIN
-        ref_items y
-        USING (item_id)
+        ref_currencies y
+        USING (currency_id)
         ORDER BY quantity ASC
-      `).then(res => res[0]),
-      gw2DB.raw(`
-        SELECT * FROM
-        (SELECT a.currency_id, (IFNULL(b.quantity, 0) - a.quantity) quantity FROM
-          gw2data_start_currencies a
-          LEFT JOIN
-          gw2data_end_currencies b
-          ON (a.currency_id = b.currency_id AND a.record_id = b.record_id)
-          WHERE a.record_id = ${record_id}
-          AND (b.quantity IS NULL
-          OR a.quantity != b.quantity)
-        UNION
-        SELECT b.currency_id, (b.quantity - IFNULL(a.quantity, 0)) quantity FROM
-          gw2data_start_currencies a
-          RIGHT OUTER JOIN
-          gw2data_end_currencies b
-          ON (a.currency_id = b.currency_id AND a.record_id = b.record_id)
-          WHERE b.record_id = ${record_id}
-          AND a.quantity IS NULL) x
-        INNER JOIN
-          ref_currencies y
-          USING (currency_id)
-          ORDER BY quantity ASC
-      `).then(res => res[0])
+    `)
+    .then((rawResponse) => rawResponse[0])
+
+  // return Promise.all([
+  //   gw2DB.raw(`
+  //     SELECT * FROM
+  //     (SELECT a.item_id, a.binding, a.upgrades, (IFNULL(b.quantity, 0) - a.quantity) quantity FROM
+  //       gw2data_start_items a
+  //       LEFT JOIN
+  //       gw2data_end_items b
+  //       ON (a.item_id = b.item_id AND a.record_id = b.record_id
+  //   			AND (a.upgrades = b.upgrades OR (a.upgrades IS NULL AND b.upgrades IS NULL)))
+  //       WHERE a.record_id = ${record_id}
+  //       AND (b.quantity IS NULL
+  //       OR a.quantity != b.quantity)
+  //     UNION
+  //     SELECT b.item_id, b.binding, b.upgrades, (b.quantity - IFNULL(a.quantity, 0)) quantity FROM
+  //       gw2data_start_items a
+  //       RIGHT OUTER JOIN
+  //       gw2data_end_items b
+  //       ON (a.item_id = b.item_id AND a.record_id = b.record_id
+  //   			AND (a.upgrades = b.upgrades OR (a.upgrades IS NULL AND b.upgrades IS NULL)))
+  //       WHERE b.record_id = ${record_id}
+  //       AND a.quantity IS NULL) x
+  //       INNER JOIN
+  //         ref_items y
+  //         USING (item_id)
+  //         ORDER BY quantity ASC
+  //     `)
+  //
+  //     // .then(res => res[0])
+  //     .then(fillUpgradeDetails),
+  //   gw2DB.raw(`
+  //     SELECT * FROM
+  //     (SELECT a.currency_id, (IFNULL(b.quantity, 0) - a.quantity) quantity FROM
+  //       gw2data_start_currencies a
+  //       LEFT JOIN
+  //       gw2data_end_currencies b
+  //       ON (a.currency_id = b.currency_id AND a.record_id = b.record_id)
+  //       WHERE a.record_id = ${record_id}
+  //       AND (b.quantity IS NULL
+  //       OR a.quantity != b.quantity)
+  //     UNION
+  //     SELECT b.currency_id, (b.quantity - IFNULL(a.quantity, 0)) quantity FROM
+  //       gw2data_start_currencies a
+  //       RIGHT OUTER JOIN
+  //       gw2data_end_currencies b
+  //       ON (a.currency_id = b.currency_id AND a.record_id = b.record_id)
+  //       WHERE b.record_id = ${record_id}
+  //       AND a.quantity IS NULL) x
+  //     INNER JOIN
+  //       ref_currencies y
+  //       USING (currency_id)
+  //       ORDER BY quantity ASC
+  //   `)
+    // .then(res => res[0])
 
   ])
   .then((results) => {
-    return {
+    let result = {
       items: results[0],
       currencies: results[1],
     }
+    // console.log(JSON.stringify(result,null,2))
+    return result
   })
   .catch((err) => {
-
+    console.error(err)
   })
 }
 
@@ -354,6 +440,45 @@ function itemDetailsQuery(ids) {
       .groupBy('item_id')
     .as('d')
   )
+}
+
+//purpose of function is to get item details of all ids listed in item.upgrades
+//then replace upgrades with an array of those item upgrades
+function fillUpgradeDetails(items) {
+  //first get a list of ids to query
+  let upgradeIDs = []
+  items.forEach((item) => {
+    if (item.upgrades) {
+      item.upgrades = item.upgrades.split()
+      upgradeIDs.push(item.upgrades)
+    }
+  })
+  if (upgradeIDs.length > 0){
+    upgradeIDs = upgradeIDs.flat()
+    return gw2DB.getItemDetailsAsObject(upgradeIDs)
+    .then((upgradeDetails) => {
+      items.forEach((item) => {
+        if (item.upgrades) {
+          let newUpgrades = []
+          item.upgrades.forEach((upgradeID) => {
+            newUpgrades.push(upgradeDetails[upgradeID])
+          })
+          item.upgrades = newUpgrades
+        }
+      })
+    })
+    .then(() => {
+      return items
+    })
+  }
+  else return items
+
+}
+
+//purpose: to remove items that are the result of free upgrade swapping
+//
+function compareUpgrades(items) {
+
 }
 
 
