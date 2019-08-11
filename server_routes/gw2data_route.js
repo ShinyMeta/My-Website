@@ -86,7 +86,7 @@ router
   .get('/currentStep', (req, res, next) => {
     DB.getActiveRecordByUser(req.user.user_id)
       .then((record) => {
-        console.log(record)
+        // console.log(record)
         if (!record) {
           res.json({currentStep: 0})
         }
@@ -283,5 +283,8 @@ router
     DB.updateRefTables()
       .then(() => {
         res.sendStatus(200)
+      })
+      .catch((err) => {
+        return next(err)
       })
   })

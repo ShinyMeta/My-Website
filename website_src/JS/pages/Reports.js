@@ -5,6 +5,7 @@ import {Link, Route, Switch} from 'react-router-dom'
 
 import Report_TopGoldFarm from '../components/Report_TopGoldFarm.js'
 import Report_GoldFarmDetails from '../components/Report_GoldFarmDetails.js'
+import Report_GoldFarmDetails2 from '../components/Report_GoldFarmDetails2.js'
 
 const propTypes = {
 
@@ -47,7 +48,7 @@ export default class Reports extends React.Component {
 
         <Switch>
           <Route path="/reports/topGoldFarm" component = {Report_TopGoldFarm}/>
-          <Route path="/reports/GoldFarmDetails" component = {Report_GoldFarmDetails}/>
+          <Route path="/reports/GoldFarmDetails" component = {Report_GoldFarmDetails2}/>
         </Switch>
       </div>
     )
