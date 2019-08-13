@@ -2,7 +2,6 @@
 
 import axios from 'axios'
 
-export default gw2MyTools
 
 const gw2MyTools = {
 
@@ -52,6 +51,7 @@ const gw2MyTools = {
 
 }
 
+export default gw2MyTools
 
 
 

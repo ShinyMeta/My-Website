@@ -38,12 +38,70 @@ router
   .use(passport.session()) //stores the serialized user to session (req.user)
 
 
+  
+
+
+
+  //////////////////////////////////////////////////////
+  // User Auth Routes
+  //////////////////////////////////////////////////////
+
+  .post('/login', passport.authenticate('local'), (req, res) => {
+    //if autehenticated, will return user:
+    res.json(req.user)
+  })
+  .post('/logout', (req, res, next) => {
+    if (req.user){
+      req.session.destroy((err) => {
+        if (err) return next(err)
+        res.sendStatus(200)
+      })
+    } else {
+      res.sendStatus(200)
+    }
+  })
+  .post('/signup', (req, res, next) => {
+    passport.authenticate('local-register', (err, user, info) => {
+      // if error during signup
+      if (err) {
+        console.error(err)
+        return next(err)
+      }
+      //if user did not get created
+      if (!user) {
+        return res.status(401).send(info.message)
+      }
+      //if user registered, will return user:
+      res.json(req.user)
+    })(req, res, next)
+  })
+
 
   //used to check if user is logged in
   .get('/user', (req, res, next) => {
     if (req.user) res.json(req.user)
     else res.json(null)
   })
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  //////////////////////////////////////////////////////
+  // Reference data endpoint
+  //////////////////////////////////////////////////////
+
+
 
   .get('/itemDetails', (req, res, next) => {
     const ids = req.query.ids.split(',').map(x => parseInt(x))
@@ -55,6 +113,94 @@ router
   })
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  //////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////  
+  //////////////////////////////////////////////////////
+  //
+  // REPORTS  REPORTS  REPORTS  REPORTS  REPORTS  REPORTS 
+  //
+  //////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////
+
+
+  
+  //////////////////////////////////////////////////////
+  // MadeToOrder endpoints
+  //////////////////////////////////////////////////////
+
+  .get('/report/madeToOrder/methodsByUser', (req, res, next) => {
+    const user_id = req.user.user_id
+
+    reportBuilder.getListOfMethodsRecordedByUser(user_id)
+      .then((result) => {
+        res.json(result)
+      })
+      .catch(console.error)
+  })
+
+  .get('/report/madeToOrder/keyElementsByMethod', (req, res, next) => {
+    const user_id = req.user.user_id
+    const method_type = req.query.method_type
+
+
+    reportBuilder.getListOfKeyElementsByMethod(user_id, method_type)
+      .then((result) => {
+        res.json(result)
+      })
+      .catch(console.error)
+  })
+
+  .get('/report/madeToOrder/SimpleReportData', (req, res, next) => {
+    const user_id = req.user.user_id
+    const method_type = req.query.method_type
+    const key_element = req.query.key_element
+
+
+    reportBuilder.getSimpleReportData(user_id, method_type, key_element)
+      .then((result) => {
+        res.json(result)
+      })
+      .catch((err) => {
+        console.log('test')
+        console.error(err)
+      })
+  })
+
+
+
+
+
+
+  //old reports endpoint, for first version of goldfarm report data
+  //uber deprecated, just don't use it
   .get('/report', (req, res, next) => {
     const {map, strategy_nickname} = req.query
 
@@ -81,6 +227,26 @@ router
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  ///////////////////////////////////////////////////
+  //  Record data endpoints
+  ///////////////////////////////////////////////////
 
 
   .get('/currentStep', (req, res, next) => {
@@ -121,37 +287,6 @@ router
   })
 
 
-
-
-  .post('/login', passport.authenticate('local'), (req, res) => {
-    //if autehenticated, will return user:
-    res.json(req.user)
-  })
-  .post('/logout', (req, res, next) => {
-    if (req.user){
-      req.session.destroy((err) => {
-        if (err) return next(err)
-        res.sendStatus(200)
-      })
-    } else {
-      res.sendStatus(200)
-    }
-  })
-  .post('/signup', (req, res, next) => {
-    passport.authenticate('local-register', (err, user, info) => {
-      // if error during signup
-      if (err) {
-        console.error(err)
-        return next(err)
-      }
-      //if user did not get created
-      if (!user) {
-        return res.status(401).send(info.message)
-      }
-      //if user registered, will return user:
-      res.json(req.user)
-    })(req, res, next)
-  })
 
   // '/startRecord' body should have character(name, class, level) items and currencies
   .post('/startRecord', (req, res, next) => {

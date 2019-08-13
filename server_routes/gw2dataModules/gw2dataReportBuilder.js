@@ -15,7 +15,170 @@ export default class gw2dataReportBuilder {
     // }
   }
 
+
+  ///////////////////////////////////////////////////////////////
+  //  Reports Made to Order  (only report on personal data)
+  ///////////////////////////////////////////////////////////////
+  //
+  // username => list of method_types
+  // username, method_type => list of key_elements
+  // username, method_type, key_element => collated report data
+  //
+  // 
+
+  //SELECT method_type FROM gw2_tools_dev.gw2data_records WHERE user_id = ***** AND method_type IS NOT NULL  GROUP BY method_type;
+  getListOfMethodsRecordedByUser(user_id) {
+    return this.DB.select('method_type')
+      .from('gw2data_records')
+      .where({ 
+        user_id, 
+        status: 'saved', 
+      })
+      .whereNot({
+        method_type: 'Farming' 
+      })
+      .groupBy('method_type')
+  }
+
+  getListOfKeyElementsByMethod(user_id, method_type) {
+    return this.DB.select('key_element','method_type')
+      .from('gw2data_records')
+      .where({ 
+        user_id, 
+        status: 'saved', 
+        method_type,
+      })
+      .groupBy('key_element')
+      .then((queryResult) => {
+        if (method_type === 'currency') {
+          let listOfCurrencyIds = queryResult.map((x) => x.key_element)
+          return this.DB.getCurrencyDetails(listOfCurrencyIds)
+        }
+        else {
+          let listOfItemIds = queryResult.map((x) => x.key_element)
+          return this.DB.getItemDetails(listOfItemIds)
+        }
+          
+      })
+  }
+
+
+
+  //SELECT item_id, SUM(quantity) quantity, binding, upgrades  FROM gw2_tools_dev.gw2data_result_items WHERE 
+  // record_id IN 
+  // (SELECT record_id FROM gw2_tools_dev.gw2data_records WHERE user_id = 2 AND status='saved' AND method_type = "Container")
+  // GROUP BY item_id, binding, upgrades
+  getSimpleReportData(user_id, method_type, key_element) {
+    //start with a query on reports
+    return Promise.all([
+      this.DB.select('item_id', this.DB.raw('SUM(quantity) quantity'), 'binding', 'upgrades')
+        .from('gw2data_result_items')
+        .whereIn('record_id',
+          this.DB.select('record_id')
+            .from('gw2data_records')
+            .where({ 
+              user_id, 
+              status: 'saved', 
+              method_type,
+              key_element,
+            })
+        ).groupBy('item_id', 'binding', 'upgrades')
+      .then((items) => {
+        let itemids = items.map((x) => x.item_id)
+        return this.DB.getItemDetailsAsObject(itemids)
+          .then((itemDetails) => {
+            items.forEach((item) => {
+              item.details = itemDetails[item.item_id]
+            })
+            return items
+          })
+      }),
+
+      this.DB.select('currency_id', this.DB.raw('SUM(quantity) quantity'))
+        .from('gw2data_result_currencies')
+        .whereIn('record_id',
+          this.DB.select('record_id')
+            .from('gw2data_records')
+            .where({ 
+              user_id, 
+              status: 'saved', 
+              method_type,
+              key_element,
+            })
+        ).groupBy('currency_id')
+      .then((currencies) => {
+        let currencyids = currencies.map((x) => x.currency_id)
+        return this.DB.getCurrencyDetailsAsObject(currencyids)
+          .then((currencyDetails) => {
+            currencies.forEach((currency) => {
+              currency.details = currencyDetails[currency.currency_id]
+            })
+            return currencies
+          })
+      })
+    ])
+    .then((results) => {
+      const keyElementDetails = results[0].find((x) => {
+        return x.item_id == key_element
+      })
+      const result = {
+        keyElementDetails,
+        items: results[0].filter((x) => x.item_id != key_element),
+        currencies: results[1]
+      }
+
+      return result
+    })
+      // .then((queryResult) => {
+      //   if (method_type === 'currency') {
+      //     let listOfCurrencyIds = queryResult.map((x) => x.key_element)
+      //     return this.DB.getCurrencyDetails(listOfCurrencyIds)
+      //   }
+      //   else {
+      //     let listOfItemIds = queryResult.map((x) => x.key_element)
+      //     return this.DB.getItemDetails(listOfItemIds)
+      //   }
+          
+      // })
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   //function that takes in a map and method name, and returns a farm report object
+  //OLD farm report fucntion
   getFarmReport(map, strategy_nickname) {
     const report_obj = {}
 

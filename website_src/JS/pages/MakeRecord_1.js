@@ -35,9 +35,9 @@ export default class MakeRecord_1 extends React.Component {
     this.state = default_state
   }
 
-    ////////////////////
-    // REACT METHODS
-    ///////////////////
+  ////////////////////
+  // REACT METHODS
+  ///////////////////
 
 
 

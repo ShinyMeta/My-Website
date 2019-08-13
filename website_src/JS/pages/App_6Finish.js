@@ -219,7 +219,7 @@ export default class App_6Finish extends React.Component {
         }
         if (isPossible.specific_salvage) {
           possibleMethods.push({
-            method_type: 'Salvage',
+            method_type: 'Equipment Salvage',
             key_element: firstItem
           })
         }
