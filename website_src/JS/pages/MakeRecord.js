@@ -1,18 +1,18 @@
-import React from 'react'
-import { Link, Route, Switch } from 'react-router-dom'
 import axios from 'axios'
+import PropTypes from 'prop-types'
+import React from 'react'
+import { Route, Switch, withRouter } from 'react-router-dom'
 
 
-import _404page from './_404page.js'
-import App_0Begin from './App_0Begin.js'
-import App_1Prep from './App_1Prep.js'
-import App_2Start from './App_2Start.js'
+// import App_1Prep from './App_1Prep.js'
+// import App_2Start from './App_2Start.js'
 import App_3Running from './App_3Running.js'
 import App_4Stopped from './App_4Stopped.js'
 import App_5Editing from './App_5Editing.js'
 import App_6Finish from './App_6Finish.js'
 import Loading from '../components/Loading.js'
-import Reports from './Reports.js'
+
+import MakeRecord_1 from './MakeRecord_1.js'
 
 const default_state = {
   selectedCharacter: null,
@@ -24,8 +24,13 @@ const default_state = {
   differences: null,
   editedResults: null
 }
+const propTypes = {
+  location: PropTypes.object.isRequired,
+  history: PropTypes.object.isRequired,
+  user: PropTypes.object,
 
-export default class App extends React.Component {
+}
+class MakeRecord extends React.Component {
   constructor(props) {
     super(props)
     this.state = default_state
@@ -91,7 +96,6 @@ export default class App extends React.Component {
   componentDidMount() {
     //make request to server to get current data
     const path_prefix = this.props.location.pathname.substring(0, 11)
-    console.log(path_prefix)
     if (path_prefix === '/makeRecord')
       this.getCurrentStep()
     else
@@ -105,21 +109,6 @@ export default class App extends React.Component {
   ////////////////////
   // EVENT HANDLERS
   ///////////////////
-
-
-  onLogoutClick(e) {
-    //send logout to server to destroy session
-    axios.post('/gw2data/logout')
-      .then((res) => {
-        //setUser on page to null
-        this.props.setUser(null)
-      })
-      .catch((err) => {
-        console.log('there was an error communicating with the server')
-        console.error(err)
-      })
-  }
-
 
   onCancelClick(e) {
     if (confirm('Are you sure you want to cancel this recording? (You wil not be able to finish, and all data gathered will be lost)')){
@@ -195,27 +184,25 @@ export default class App extends React.Component {
 
     return (
       <div>
-        <h2>Welcome, {this.props.user.username}! You are Signed in!</h2>
-        <button type="button" onClick = {this.onLogoutClick.bind(this)}>Logout</button>
-          <br />
         <button type="button" onClick = {this.onCancelClick.bind(this)}
           hidden={this.state.currentStep === 0}>Cancel Current Recording</button>
           <br />
         <Switch>
-          <Route exact path="/" component = {App_0Begin}/>
           <Route path="/makeRecord/1-prep" render = {(props) => {
-              return <App_1Prep {...props} user = {this.props.user}
+              return <MakeRecord_1 {...props} user = {this.props.user}
                 selectedCharacter={this.state.selectedCharacter}
                 setSelectedCharacter={this.setSelectedCharacter}
+                setStartTime = {this.setStartTime}
+                setCurrentStep = {this.setCurrentStep}
               />
             }} />
-          <Route path="/makeRecord/2-start" render = {(props) => {
+          {/* <Route path="/makeRecord/2-start" render = {(props) => {
               return <App_2Start {...props} user = {this.props.user}
                 selectedCharacter={this.state.selectedCharacter}
                 setStartTime = {this.setStartTime}
                 setCurrentStep = {this.setCurrentStep}
               />
-            }} />
+            }} /> */}
           <Route path="/makeRecord/3-running" render = {(props) => {
               return <App_3Running {...props} user = {this.props.user}
                 start_time = {this.state.start_time}
@@ -251,11 +238,13 @@ export default class App extends React.Component {
                 resetApp = {this.resetApp}
               />
             }} />
-          <Route path="/reports" component = {Reports}/>
 
-          <Route component={_404page} />
         </Switch>
       </div>
     )
   }
 }
+
+MakeRecord.propTypes = propTypes
+
+export default withRouter(MakeRecord)

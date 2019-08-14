@@ -57,6 +57,7 @@ function register(req, username, password, done) {
         .insert(new_user)
         .then(([id]) => {
           new_user.user_id = id
+          req.user = new_user
           return done(null, new_user)
         })
         .catch(done)

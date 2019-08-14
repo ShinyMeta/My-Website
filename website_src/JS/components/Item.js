@@ -3,6 +3,12 @@ import React from 'react'
 
 const propTypes = {
   item: PropTypes.any,
+  /*  name
+      description (optional)
+      icon
+      quantity(+green/-red)/count(white)
+      item_id (if null, renders unknown)
+  */
   onDoubleClick: PropTypes.func,
   noQuantity: PropTypes.bool,
 }

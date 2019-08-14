@@ -93,41 +93,47 @@ export default class App_2Start extends React.Component {
   }
 
   onSwapCheckClick(e) {
+
+    this.setSwapCheckState(this.checkSwap())
+
+
+
+    //OLD VERSION:
     //get Items from API again
-    GW2API.characterInventory(this.props.user.apikey, this.props.selectedCharacter)
-      //check if first 5 match reorder strategy
-      .then((new_inventory) => {
-        //swap strategy
-        if (this.state.newItemOrder) {
-          //check if new inventory is old inventory mapped via new order
-          const old_inventory = this.state.selectedCharacterInventory
-          const newItemOrder = this.state.newItemOrder
-          for (let i = 0; i < 5; i++) {
-            if (!(!new_inventory[i]     && !old_inventory[newItemOrder[i]]) &&
-                !((new_inventory[i]     &&  old_inventory[newItemOrder[i]]) &&
-                  (new_inventory[i].id  === old_inventory[newItemOrder[i]].item_id) ) ) {
-              this.setState({swapVerified: false, swapVerifiedMessage:
-                  `The API does not yet reflect the indicated items in your inventory.
-                  Double check your bag, or try again in a bit (can take up to 5 minutes to reflect changes)`})
-              return
-            }
-          }
-          //if we reached this, then all 5 items checked out
-          this.setState({swapVerified: true, swapVerifiedMessage: 'VERIFIED'})
-        }
-        else {
-          //put any item into slot 3
-          if (new_inventory[2]) {
-            this.setState({swapVerified: true, swapVerifiedMessage: 'VERIFIED'})
-          }
-          else {
-            this.setState({swapVerified: false, swapVerifiedMessage:
-                `The API does not yet reflect the indicated items in your inventory.
-                Double check your bag, or try again in a bit (can take up to 5 minutes to reflect changes)`})
-            return
-          }
-        }
-      })
+    // GW2API.characterInventory(this.props.user.apikey, this.props.selectedCharacter)
+    //   //check if first 5 match reorder strategy
+    //   .then((new_inventory) => {
+    //     //swap strategy
+    //     if (this.state.newItemOrder) {
+    //       //check if new inventory is old inventory mapped via new order
+    //       const old_inventory = this.state.selectedCharacterInventory
+    //       const newItemOrder = this.state.newItemOrder
+    //       for (let i = 0; i < 5; i++) {
+    //         if (!(!new_inventory[i]     && !old_inventory[newItemOrder[i]]) &&
+    //             !((new_inventory[i]     &&  old_inventory[newItemOrder[i]]) &&
+    //               (new_inventory[i].id  === old_inventory[newItemOrder[i]].item_id) ) ) {
+    //           this.setState({swapVerified: false, swapVerifiedMessage:
+    //               `The API does not yet reflect the indicated items in your inventory.
+    //               Double check your bag, or try again in a bit (can take up to 5 minutes to reflect changes)`})
+    //           return
+    //         }
+    //       }
+    //       //if we reached this, then all 5 items checked out
+    //       this.setState({swapVerified: true, swapVerifiedMessage: 'VERIFIED'})
+    //     }
+    //     else {
+    //       //put any item into slot 3
+    //       if (new_inventory[2]) {
+    //         this.setState({swapVerified: true, swapVerifiedMessage: 'VERIFIED'})
+    //       }
+    //       else {
+    //         this.setState({swapVerified: false, swapVerifiedMessage:
+    //             `The API does not yet reflect the indicated items in your inventory.
+    //             Double check your bag, or try again in a bit (can take up to 5 minutes to reflect changes)`})
+    //         return
+    //       }
+    //     }
+    //   })
   }
 
 
@@ -142,14 +148,60 @@ export default class App_2Start extends React.Component {
   // HELPER METHODS
   ///////////////////
 
+  checkSwap() {
+    GW2API.characterInventory(this.props.user.apikey, this.props.selectedCharacter)
+      //check if first 5 match reorder strategy
+      .then((new_inventory) => {
+        //swap strategy
+        if (this.state.newItemOrder) {
+          //check if new inventory is old inventory mapped via new order
+          const old_inventory = this.state.selectedCharacterInventory
+          const newItemOrder = this.state.newItemOrder
+          for (let i = 0; i < 5; i++) {
+            if (!(!new_inventory[i]     && !old_inventory[newItemOrder[i]]) &&
+                !((new_inventory[i]     &&  old_inventory[newItemOrder[i]]) &&
+                  (new_inventory[i].id  === old_inventory[newItemOrder[i]].item_id) ) ) {
+              return false
+            }
+          }
+          //if we reached this, then all 5 items checked out
+          return true
+        }
+        else {
+          //put any item into slot 3
+          if (new_inventory[2]) {
+            return true
+          }
+          else {
+            return false
+          }
+        }
+      })
+  }
+
+  setSwapCheckState(isSwapped){
+    if (isSwapped) {
+      this.setState({swapVerified: true, swapVerifiedMessage: 'VERIFIED'})
+    }
+    else {
+      this.setState({swapVerified: false, swapVerifiedMessage:
+          `The API does not yet reflect the indicated items in your inventory.
+          Double check your bag, or try again in a bit (can take up to 5 minutes to reflect changes)`})
+    }
+  }
+
+  swapCheckTimerFunction() {
+    let timer_id = setTimeout(() => {
+      gw2MyTools.beep()
+      this.getItemsFromAPI()
+    }, 305000)
+    this.setState(() => {return {selectedCharacterInventory: inventory, timer_id}},
+  }
+
   getItemsFromAPI() {
     GW2API.characterInventory(this.props.user.apikey, this.props.selectedCharacter)
       .then((inventory) => {
-        let timer_id = setTimeout(() => {
-          gw2MyTools.beep()
-          this.getItemsFromAPI()
-        }, 305000)
-        this.setState(() => {return {selectedCharacterInventory: inventory, timer_id}},
+
         () => {
           this.getFirstFiveDetails()
           this.rearrangeFirstFive()

@@ -210,10 +210,11 @@ GW2API.fullAccountState = (apikey) => {
 }
 
 GW2API.allCharacterItems = (apikey) => {
-  let items = []
+  // let items = []
   return GW2API.characters(apikey, true)
     .then((characters) => {
-      return bagsToItems(charactersToBags(characters))
+      return bagsToItems(charactersToBags(characters)).concat(charactersToEquipment(characters))
+      // also #add equipment
     })
 }
 
@@ -278,7 +279,8 @@ function addItemsToFullState (newItems, fullStateItems, indexer) {
       let itemFormattedForDB = {
         item_id: item.id,
         quantity: item.count,
-        binding: item.binding
+        binding: item.binding,
+        upgrades: (item.upgrades) ? item.upgrades.toString() : null
       }
       fullStateItems.push(itemFormattedForDB)
     }
@@ -287,7 +289,11 @@ function addItemsToFullState (newItems, fullStateItems, indexer) {
 
 }
 
-
+function charactersToEquipment(characters) {
+  let result = characters.map((x) => x.equipment).flat()
+  result.forEach((x) => {x.count = 1})
+  return result
+}
 
 function charactersToBags (characters) {
   let bags = []
