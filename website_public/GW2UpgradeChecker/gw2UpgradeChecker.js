@@ -109,20 +109,30 @@ function displayResultsToTable(priceCompareData) {
         let newRow = $("<tr>");
 
         newRow.append($("<td>", {
-            html: `<img src="${resultRow.equip.icon}"/> ${resultRow.equip.name} <br/>
-            <img src="${resultRow.upgrade.icon}"/> ${resultRow.upgrade.name}`
+            html: `<div class="detailBox"><img class="equipImg" src="${resultRow.equip.icon}"/> <img class="upgradeImg" src="${resultRow.upgrade.icon}"/>
+            <div class="itemText"><div>${resultRow.equip.name}</div><div>${resultRow.upgrade.name}</div></div></div>`
         }))
         newRow.append($("<td>", {
-            html: `<div class="buyPrice">${GetCoinString(resultRow.sellToTP.buyPrice)}</div>
-                <div class="sellPrice">${GetCoinString(resultRow.sellToTP.sellPrice)}</div>`
+            html: `<div class="price">
+                <div class="buyPrice">Buy: ${GetCoinString(resultRow.sellToTP.buyPrice)}</div>
+                <div class="sellPrice">Sell: ${GetCoinString(resultRow.sellToTP.sellPrice)}</div>
+                </div>`
         }))
         newRow.append($("<td>", {
-            html: `<div class="buyPrice">${GetCoinString(resultRow.extractUpgradeThenSalvage.buyPrice)}</div>
-                <div class="sellPrice">${GetCoinString(resultRow.extractUpgradeThenSalvage.sellPrice)}</div>`
+            html: `<div class="price">
+                <div class="buyPrice">Buy: ${GetCoinString(resultRow.extractUpgradeThenSalvage.buyPrice)} &nbsp;
+                    (${GetComparisonCoinString(resultRow.extractUpgradeThenSalvage.buyPrice - resultRow.sellToTP.buyPrice)})</div>
+                <div class="sellPrice">Sell: ${GetCoinString(resultRow.extractUpgradeThenSalvage.sellPrice)} &nbsp;
+                    (${GetComparisonCoinString(resultRow.extractUpgradeThenSalvage.sellPrice - resultRow.sellToTP.sellPrice)})</div>
+                </div>`
         }))
         newRow.append($("<td>", {
-            html: `<div class="buyPrice">${GetCoinString(resultRow.blackLionSalvage.buyPrice)}</div>
-                <div class="sellPrice">${GetCoinString(resultRow.blackLionSalvage.sellPrice)}</div>`
+            html: `<div class="price">
+                <div class="buyPrice">Buy: ${GetCoinString(resultRow.blackLionSalvage.buyPrice)} 
+                    (${GetComparisonCoinString(resultRow.blackLionSalvage.buyPrice - resultRow.sellToTP.buyPrice)})</div>
+                <div class="sellPrice">Sell: ${GetCoinString(resultRow.blackLionSalvage.sellPrice)} 
+                    (${GetComparisonCoinString(resultRow.blackLionSalvage.sellPrice - resultRow.sellToTP.sellPrice)})</div>
+                </div>`
         }))
 
         $("#resultsTbody").append(newRow);
@@ -167,4 +177,19 @@ function GetCoinString(amountInCopper) {
     result += `${copper} <img class="coin" src="https://render.guildwars2.com/file/6CF8F96A3299CFC75D5CC90617C3C70331A1EF0E/156902.png">`
 
     return result;
+}
+
+function GetComparisonCoinString(priceInCopper) {
+    let positive = (priceInCopper >= 0);
+
+    let pricedifference = GetCoinString(Math.abs(priceInCopper));
+
+    if (!positive) {
+        pricedifference = '<span class="negative" title="Less profitable than selling to TP directly"> -' + pricedifference + '</span>';
+    }
+    else {
+        pricedifference = '<span class="positive" title="More profitable than selling to TP directly"> +' + pricedifference + '</span>';
+    }
+
+    return pricedifference;
 }

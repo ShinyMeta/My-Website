@@ -2,15 +2,18 @@
 <html>
 
 <head>
+  <title>GW2 Upgrade Checker</title>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
   <script src="gw2api-client.js"></script>
   <script src="gw2UpgradeChecker.js"></script>
   <link rel="stylesheet" href="gw2UpgradeChecker.css">
-
+  <link rel="icon" href="https://render.guildwars2.com/file/1608A16AF9B0EEE466699380AA30F54A36A0EEDA/102496.png">
 </head>
 
 <body>
-  <h1>GW2 Upgrade Checker</h1>
+
+    <h1><img id="bltcLogo"
+      src="https://wiki.guildwars2.com/images/thumb/8/8c/User_Incarnazeus_Black_Lion_Trading_Company_Logo.png/645px-User_Incarnazeus_Black_Lion_Trading_Company_Logo.png">GW2 Upgrade Checker</h1>
   <div class="formContainer">
     <div>
       <input type="text" id="apiKeyInput" name="apiKey" placeholder="Enter Your Api Key Here">
@@ -29,12 +32,12 @@
     <thead>
       <tr>
         <th>Item Details</th>
-        <th><img src="https://render.guildwars2.com/file/1608A16AF9B0EEE466699380AA30F54A36A0EEDA/102496.png">Sell To TP
+        <th><img src="https://render.guildwars2.com/file/1608A16AF9B0EEE466699380AA30F54A36A0EEDA/102496.png"> Sell To TP
         </th>
-        <th><img src="https://render.guildwars2.com/file/0E92A458B335144232EB357A3C96DB273B09AD3B/674829.png">Extract
-          Upgrade Then Salvage</th>
-        <th><img src="https://render.guildwars2.com/file/2204EE5D7B1F7BEE9261CBAE3BF1DB5B027EE607/66551.png">Salvage
-          With Black Lion Kit</th>
+        <th title="Extract upgrade, sell upgrade on TP, then salvage exotic with rare salvage kit for average return of 1.2 ecto"><img src="https://render.guildwars2.com/file/0E92A458B335144232EB357A3C96DB273B09AD3B/674829.png"> &nbsp;
+          Extract Upgrade Then Salvage</th>
+        <th title="Salvage with black lion salvage kit, sell upgrade on TP. Expected ecto return on exotic salvage is 1.66"><img src="https://render.guildwars2.com/file/2204EE5D7B1F7BEE9261CBAE3BF1DB5B027EE607/66551.png"> &nbsp;
+          Salvage With Black Lion Kit</th>
       </tr>
     </thead>
     <tbody id="resultsTbody">

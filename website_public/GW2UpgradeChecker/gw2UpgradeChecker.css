@@ -1,16 +1,26 @@
 body{
     margin: 50px;
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #252526;
+    color: #858585;
 }
 
 h1 {
-    display: block;
-    text-align: center;
-color: blueviolet;
+    display: flex;
+    margin-top: 50px;
+    margin-bottom: 50px;
+    justify-content: center;
+    align-items: center;
+    color: #A15A4E;
+    font-size: 60px;
+}
+
+#bltcLogo{
+    height: 150px;
 }
 
 .formContainer{
-    /* margin-left: 150px; */
-    margin-right: 150px; 
+    height: 100px;
     display: flex;
     flex-direction: row;
     justify-content: space-between;
@@ -21,9 +31,99 @@ color: blueviolet;
 }
 
 .buySellCheckboxes{
-    padding-right: 100px;
+    padding-right: 250px;
 }
 
 table{
     width: 100%;
+    display: grid;
+    grid-template-rows: auto auto;
+    border-top: solid;
+    border-left: solid;
+    border-right: solid;
+    
+}
+
+thead tr{
+    display: grid;
+    grid-template-columns: 25% 25% 25% 25%;
+    border-bottom: solid;
+}
+
+th{
+    margin: auto;
+    display: flex;    
+    justify-content: center;
+    align-items: center;
+    font-size: 16pt;
+}
+
+th img{
+    width: 50px;
+    height: auto;
+    border-radius: 50%;
+}
+
+tbody tr{
+    display: grid;
+    grid-template-columns: 25% 25% 25% 25%;
+    border-bottom: solid;
+}
+
+.detailBox{
+    display: grid;
+    grid-template-columns: 100px auto;
+    height: 100px;
+}
+
+.equipImg{
+    height: 75px;
+    width: 75px;
+    position: absolute;
+    grid-column: 1/2;
+    border-style: solid;
+    border-color: black;
+    margin-top: 10px;
+    margin-left: 9px;
+}
+
+.upgradeImg{
+    width: 25px;
+    height: auto;
+    border-style: solid;
+    border-color: black;
+    grid-column: 1/2;
+    position: relative;
+    top: 60px;
+    left: 57px;
+}
+
+.itemText{
+    grid-column: 2/3;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-self: center;
+}
+
+.price{
+    display: flex;
+    height: 100%;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.coin{
+    width: 17px;
+    height: auto;
+}
+
+.positive{
+    color: green;
+    
+}
+
+.negative{
+    color: red;
 }
