@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="gw2api-client.js"></script>
+  <script src="gw2UpgradeChecker.js"></script>
+  <link rel="stylesheet" href="gw2UpgradeChecker.css">
+
+</head>
+
+<body>
+  <h1>GW2 Upgrade Checker</h1>
+  <div class="formContainer">
+    <div>
+      <input type="text" id="apiKeyInput" name="apiKey" placeholder="Enter Your Api Key Here">
+      <button onclick="GetApiKeyAndRunTool()" type="button" value="Submit">Submit</button>
+    </div>
+
+    <div class="buySellCheckboxes">
+      <input onchange="OnBuySellToggle()" checked type="checkbox" name="Buy" id="BuyCheckbox" value="Buy"> Buy Price
+      <br />
+      <input onchange="OnBuySellToggle()" checked type="checkbox" name="Sell" id="SellCheckbox" value="Sell"> Sell Price
+      <br />
+    </div>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Item Details</th>
+        <th><img src="https://render.guildwars2.com/file/1608A16AF9B0EEE466699380AA30F54A36A0EEDA/102496.png">Sell To TP
+        </th>
+        <th><img src="https://render.guildwars2.com/file/0E92A458B335144232EB357A3C96DB273B09AD3B/674829.png">Extract
+          Upgrade Then Salvage</th>
+        <th><img src="https://render.guildwars2.com/file/2204EE5D7B1F7BEE9261CBAE3BF1DB5B027EE607/66551.png">Salvage
+          With Black Lion Kit</th>
+      </tr>
+    </thead>
+    <tbody id="resultsTbody">
+
+    </tbody>
+  </table>
+
+</body>
+
+</html>

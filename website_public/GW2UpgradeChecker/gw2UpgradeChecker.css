@@ -1,0 +1,29 @@
+body{
+    margin: 50px;
+}
+
+h1 {
+    display: block;
+    text-align: center;
+color: blueviolet;
+}
+
+.formContainer{
+    /* margin-left: 150px; */
+    margin-right: 150px; 
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+#apiKeyInput{    
+    width: 600px;
+}
+
+.buySellCheckboxes{
+    padding-right: 100px;
+}
+
+table{
+    width: 100%;
+}
