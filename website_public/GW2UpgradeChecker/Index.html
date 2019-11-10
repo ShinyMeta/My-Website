@@ -13,12 +13,14 @@
 <body>
 
     <h1><img id="bltcLogo"
-      src="https://wiki.guildwars2.com/images/thumb/8/8c/User_Incarnazeus_Black_Lion_Trading_Company_Logo.png/645px-User_Incarnazeus_Black_Lion_Trading_Company_Logo.png">GW2 Upgrade Checker</h1>
+      src="https://wiki.guildwars2.com/images/thumb/8/8c/User_Incarnazeus_Black_Lion_Trading_Company_Logo.png/645px-User_Incarnazeus_Black_Lion_Trading_Company_Logo.png"> GW2 Upgrade Checker</h1>
   <div class="formContainer">
     <div>
       <input type="text" id="apiKeyInput" name="apiKey" placeholder="Enter Your Api Key Here">
       <button onclick="GetApiKeyAndRunTool()" type="button" value="Submit">Submit</button>
+      <a id="getAPIKey" href="https://account.arena.net/login?redirect_uri=%2Fapplications"> &nbsp; Get Your API Key - Requires Bank Access</a>
     </div>
+  
 
     <div class="buySellCheckboxes">
       <input onchange="OnBuySellToggle()" checked type="checkbox" name="Buy" id="BuyCheckbox" value="Buy"> Buy Price

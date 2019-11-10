@@ -30,6 +30,11 @@ h1 {
     width: 600px;
 }
 
+#getAPIKey{
+    color: cornflowerblue;
+    text-decoration: none;
+}
+
 .buySellCheckboxes{
     padding-right: 250px;
 }
