@@ -124,11 +124,20 @@ tbody tr{
     height: auto;
 }
 
-.positive{
+.negative{
+    color: red;
+}
+
+.lessThan10Silver{
+    color: darkorange;
+}
+
+.lessThan20Silver{
+    color: yellow;
+}
+
+.moreThan20Silver{
     color: green;
     
 }
 
-.negative{
-    color: red;
-}

@@ -146,7 +146,7 @@ export default class Report_MadeToOrder extends React.Component {
     return <tr key={item.item_id}>
       <td><Item item = {item.details} /></td>
       <td>{item.details.name}</td>
-      <td>{Math.abs(item.quantity)}</td>
+      <td>{item.quantity}</td>
     </tr>
   }
 
@@ -163,7 +163,7 @@ export default class Report_MadeToOrder extends React.Component {
     return <tr key={currency.currency_id}>
       <td><Currency currency = {currency.details} /></td>
       <td>{currency.details.name}</td>
-      <td>{Math.abs(currency.quantity)}</td>
+      <td>{currency.quantity}</td>
     </tr>
   }
 

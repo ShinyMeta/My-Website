@@ -107,6 +107,7 @@ function displayResultsToTable(priceCompareData) {
 
     priceCompareData.forEach((resultRow) => {
         let newRow = $("<tr>");
+        let tpTax = .85;
 
         newRow.append($("<td>", {
             html: `<div class="detailBox"><img class="equipImg" src="${resultRow.equip.icon}"/> <img class="upgradeImg" src="${resultRow.upgrade.icon}"/>
@@ -114,24 +115,24 @@ function displayResultsToTable(priceCompareData) {
         }))
         newRow.append($("<td>", {
             html: `<div class="price">
-                <div class="buyPrice">Buy: ${GetCoinString(resultRow.sellToTP.buyPrice)}</div>
-                <div class="sellPrice">Sell: ${GetCoinString(resultRow.sellToTP.sellPrice)}</div>
+                <div class="buyPrice">Buy: ${GetCoinString(resultRow.sellToTP.buyPrice * tpTax)}</div>
+                <div class="sellPrice">Sell: ${GetCoinString(resultRow.sellToTP.sellPrice * tpTax)}</div>
                 </div>`
         }))
         newRow.append($("<td>", {
             html: `<div class="price">
-                <div class="buyPrice">Buy: ${GetCoinString(resultRow.extractUpgradeThenSalvage.buyPrice)} &nbsp;
-                    (${GetComparisonCoinString(resultRow.extractUpgradeThenSalvage.buyPrice - resultRow.sellToTP.buyPrice)})</div>
-                <div class="sellPrice">Sell: ${GetCoinString(resultRow.extractUpgradeThenSalvage.sellPrice)} &nbsp;
-                    (${GetComparisonCoinString(resultRow.extractUpgradeThenSalvage.sellPrice - resultRow.sellToTP.sellPrice)})</div>
+                <div class="buyPrice">Buy: ${GetCoinString(resultRow.extractUpgradeThenSalvage.buyPrice * tpTax)} &nbsp;
+                    (${GetComparisonCoinString((resultRow.extractUpgradeThenSalvage.buyPrice * tpTax)- (resultRow.sellToTP.buyPrice * tpTax))})</div>
+                <div class="sellPrice">Sell: ${GetCoinString(resultRow.extractUpgradeThenSalvage.sellPrice * tpTax)} &nbsp;
+                    (${GetComparisonCoinString((resultRow.extractUpgradeThenSalvage.sellPrice * tpTax) - (resultRow.sellToTP.sellPrice * tpTax))})</div>
                 </div>`
         }))
         newRow.append($("<td>", {
             html: `<div class="price">
-                <div class="buyPrice">Buy: ${GetCoinString(resultRow.blackLionSalvage.buyPrice)} 
-                    (${GetComparisonCoinString(resultRow.blackLionSalvage.buyPrice - resultRow.sellToTP.buyPrice)})</div>
-                <div class="sellPrice">Sell: ${GetCoinString(resultRow.blackLionSalvage.sellPrice)} 
-                    (${GetComparisonCoinString(resultRow.blackLionSalvage.sellPrice - resultRow.sellToTP.sellPrice)})</div>
+                <div class="buyPrice">Buy: ${GetCoinString(resultRow.blackLionSalvage.buyPrice * tpTax)} 
+                    (${GetComparisonCoinString((resultRow.blackLionSalvage.buyPrice * tpTax) - (resultRow.sellToTP.buyPrice * tpTax))})</div>
+                <div class="sellPrice">Sell: ${GetCoinString(resultRow.blackLionSalvage.sellPrice * tpTax)} 
+                    (${GetComparisonCoinString((resultRow.blackLionSalvage.sellPrice * tpTax) - (resultRow.sellToTP.sellPrice * tpTax))})</div>
                 </div>`
         }))
 
@@ -180,15 +181,21 @@ function GetCoinString(amountInCopper) {
 }
 
 function GetComparisonCoinString(priceInCopper) {
-    let positive = (priceInCopper >= 0);
+    // let positive = (priceInCopper >= 0);
 
     let pricedifference = GetCoinString(Math.abs(priceInCopper));
 
-    if (!positive) {
+    if (priceInCopper <= 0) {
         pricedifference = '<span class="negative" title="Less profitable than selling to TP directly"> -' + pricedifference + '</span>';
     }
+    else if (priceInCopper > 0 && priceInCopper <=1000){
+        pricedifference = '<span class="lessThan10Silver" title="More profitable than selling to TP directly"> -' + pricedifference + '</span>'
+    }
+    else if (priceInCopper > 1000 && priceInCopper <= 2000){
+        pricedifference = '<span class="lessThan20Silver" title="More profitable than selling to TP directly"> -' + pricedifference + '</span>'
+    }
     else {
-        pricedifference = '<span class="positive" title="More profitable than selling to TP directly"> +' + pricedifference + '</span>';
+        pricedifference = '<span class="moreThan20Silver" title="More profitable than selling to TP directly"> +' + pricedifference + '</span>';
     }
 
     return pricedifference;
