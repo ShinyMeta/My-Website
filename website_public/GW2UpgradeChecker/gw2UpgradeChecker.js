@@ -189,10 +189,10 @@ function GetComparisonCoinString(priceInCopper) {
         pricedifference = '<span class="negative" title="Less profitable than selling to TP directly"> -' + pricedifference + '</span>';
     }
     else if (priceInCopper > 0 && priceInCopper <=1000){
-        pricedifference = '<span class="lessThan10Silver" title="More profitable than selling to TP directly"> -' + pricedifference + '</span>'
+        pricedifference = '<span class="lessThan10Silver" title="More profitable than selling to TP directly"> +' + pricedifference + '</span>'
     }
     else if (priceInCopper > 1000 && priceInCopper <= 2000){
-        pricedifference = '<span class="lessThan20Silver" title="More profitable than selling to TP directly"> -' + pricedifference + '</span>'
+        pricedifference = '<span class="lessThan20Silver" title="More profitable than selling to TP directly"> +' + pricedifference + '</span>'
     }
     else {
         pricedifference = '<span class="moreThan20Silver" title="More profitable than selling to TP directly"> +' + pricedifference + '</span>';
