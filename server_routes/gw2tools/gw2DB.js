@@ -187,7 +187,7 @@ function castResultStateforDB(resultState) {
           binding: item.binding,
           quantity: item.quantity,
           item_id: item.item_id,
-          upgrades: (item.upgrades)?item.upgrades.map((x) => x.item_id):null,
+          upgrades: (item.upgrades)?item.upgrades.filter((x)=> x !== null).map((x) => x.item_id):null,
         })),
     currencies: resultState.currencies.map((currency) => ({
           quantity: currency.quantity,
