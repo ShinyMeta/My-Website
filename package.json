@@ -54,7 +54,8 @@
     "production": "SET NODE_ENV=production&babel-node ExpressServer.js",
     "build:server": "babel ExpressServer_dev.js --out-file ExpressServer.js",
     "build:client": "webpack -p --config webpack.prod.config.js --progress",
-    "build": "better-npm-run build"
+    "build": "better-npm-run build",
+    "DBUpdates": "node ./server_routes/gw2tools/scheduledDBUpdates.js"
   },
   "betterScripts": {
     "build": {
