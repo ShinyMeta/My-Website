@@ -614,6 +614,66 @@ gw2DB.getCurrencyDetailsAsObject = (ids) => {
 ////////////////////////////////////////////
 ////////////////////////////////////////////
 ////////////////////////////////////////////
+//  UPDATE TP TABLES FUNCTIONS
+////////////////////////////////////////////
+////////////////////////////////////////////
+////////////////////////////////////////////
+
+
+gw2DB.insertTPHistory = (rows) => {
+  const timestamp = new Date()
+
+  // let rowcount = 0
+  rows.forEach((row) => {
+    row.timestamp = timestamp
+    // console.log(++rowcount)
+  })
+
+  return gw2DB.batchInsert('tp_history', rows)
+    .then((ids) => {
+      //stuff
+      console.log(ids)
+    })
+    .catch((err) => {
+      console.error(err)
+    })
+}
+
+gw2DB.insertTPHistoryWrapperFromApiResponse = (APIResponse) => {
+  const rows = APIResponse.map((x) => {
+    return {
+      item_id: x.id,
+      sell_price: x.sells.unit_price,
+      sell_qty: x.sells.quantity,
+      buy_price: x.buys.unit_price,
+      buy_qty: x.buys.quantity
+    }
+  })
+
+  return gw2DB.insertTPHistory(rows)
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+////////////////////////////////////////////
+////////////////////////////////////////////
+////////////////////////////////////////////
 //  UPDATE LOOKUP TABLES FUNCTIONS
 ////////////////////////////////////////////
 ////////////////////////////////////////////
