@@ -614,7 +614,7 @@ gw2DB.getCurrencyDetailsAsObject = (ids) => {
 ////////////////////////////////////////////
 ////////////////////////////////////////////
 ////////////////////////////////////////////
-//  UPDATE TP TABLES FUNCTIONS
+//  TP TABLES FUNCTIONS
 ////////////////////////////////////////////
 ////////////////////////////////////////////
 ////////////////////////////////////////////
@@ -646,14 +646,83 @@ gw2DB.insertTPHistoryWrapperFromApiResponse = (APIResponse) => {
       sell_price: x.sells.unit_price,
       sell_qty: x.sells.quantity,
       buy_price: x.buys.unit_price,
-      buy_qty: x.buys.quantity
+      buy_qty: x.buys.quantity,
+      new_sell_listings: x.new_sell_listings,
+      sell_listings_pulled: x.sell_listings_pulled,
+      sell_listings_sold: x.sell_listings_sold,
+      new_buy_orders: x.new_buy_orders,
+      buy_orders_pulled: x.buy_orders_pulled,
+      buy_orders_filled: x.buy_orders_filled,
     }
   })
-
+  console.log(rows)
   return gw2DB.insertTPHistory(rows)
 }
 
 
+gw2DB.storeSummaryStatistics
+
+
+////////////////////////////////////////////
+////////////////////////////////////////////
+//  TP Reporting
+////////////////////////////////////////////
+////////////////////////////////////////////
+
+gw2DB.allTPItemIds = () => {
+  let prevDate = new Date()
+  prevDate.setDate(prevDate.getDate()-1)
+  return gw2DB('tp_history')
+    .distinct('item_id')
+    .where('timestamp', '>', prevDate)
+}
+
+gw2DB.allTPItemSummaries = () => {
+
+}
+
+
+gw2DB.getTPHistoryForItem = (item_id, numOfDays, startDate = new Date()) => {
+  let prevDate = new Date(startDate)
+  prevDate.setDate(prevDate.getDate()-numOfDays)
+  return gw2DB('tp_history')
+    .where({item_id})
+    .where('timestamp', '>', prevDate)
+    .where('timestamp', '<', startDate)
+    .then((x) => {
+      if (x.length === 0) {
+        throw Error('item_id not found on TP')
+      }
+      else {
+        return x
+      }
+    })
+}
+
+
+gw2DB.getTPSummaryForItem = (item_id, numOfDays, startDate = new Date()) => {
+  return gw2DB.getTPHistoryForItem(item_id, numOfDays, startDate)
+    .then((dataArr) => {
+      return createSummaryStatisticObject(dataArr, ['sell_price', 'buy_price'])
+    })
+}
+
+
+function createSummaryStatisticObject(dataArr, propNamesToSummarize) {
+  let result = {
+    current: dataArr.reduce((runningmax, next) => next.timestamp>runningmax.timestamp ? next : runningmax, {timestamp: 0})
+  }
+  propNamesToSummarize.forEach((propName) => {
+    let propData = dataArr.map(x => x[propName]).sort((a,b) => a-b)
+    result[propName] = {
+      mean: Math.round(propData.reduce((sum, x) => sum + x, 0)/propData.length),
+      median: propData[Math.round(propData.length/2)],
+      firstQuartile: propData[Math.round(propData.length/4)],
+      thirdQuartile: propData[Math.round(propData.length*3/4)],
+    }
+  })
+  return result
+}
 
 
 

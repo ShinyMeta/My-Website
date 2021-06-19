@@ -68,6 +68,7 @@ app.use(bodyParser.json({limit: '50mb'}))
 
 //router for gw2daata JSON responses
 app.use('/gw2data', require('./server_routes/gw2data_route'))
+app.use('/gw2dataAPI', require('./server_routes/gw2data_API'))
 
 
 if (process.env.NODE_ENV === 'development') {
