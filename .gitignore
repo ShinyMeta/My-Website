@@ -1,7 +1,4 @@
 node_modules
-ExpressServer.js
-**/gw2data.bundle.js
-**/gw2data.bundle.js.map
 **.rdp
 **.pem
 

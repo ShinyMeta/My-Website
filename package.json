@@ -1,70 +1,18 @@
 {
   "name": "my-website",
   "version": "1.0.0",
-  "description": "",
-  "main": "ExpressServer.js",
+  "description": "Static landing site host",
+  "main": "ExpressServer_dev.js",
   "dependencies": {
-    "axios": "^0.18.1",
-    "bcrypt-nodejs": "0.0.3",
-    "body-parser": "^1.19.0",
-    "connect-redis": "^3.4.1",
-    "express": "^4.16.4",
-    "express-session": "^1.16.1",
-    "greenlock-express": "^4.0.3",
-    "gw2api-client": "^7.4.1",
-    "helmet": "^3.21.2",
-    "hjs": "0.0.6",
-    "knex": "^0.16.5",
-    "mysql": "^2.17.1",
-    "npm": "^6.13.4",
-    "p-queue": "^5.0.0",
-    "passport": "^0.4.0",
-    "passport-local": "^1.0.0",
-    "react": "^16.8.6",
-    "react-bootstrap-table-next": "^3.1.1",
-    "react-dom": "^16.8.6"
+    "express": "^4.16.4"
   },
   "devDependencies": {
-    "@babel/cli": "^7.4.4",
-    "@babel/core": "^7.4.4",
-    "@babel/node": "^7.2.2",
-    "@babel/plugin-proposal-class-properties": "^7.4.4",
-    "@babel/preset-env": "^7.4.4",
-    "@babel/preset-react": "^7.0.0",
-    "babel-loader": "^8.0.5",
-    "css-loader": "^2.1.1",
-    "eslint": "^5.16.0",
-    "eslint-plugin-react": "^7.12.4",
-    "history": "^4.9.0",
-    "html-webpack-plugin": "^3.2.0",
-    "nodemon": "^1.18.11",
-    "prop-types": "^15.7.2",
-    "react-router": "^5.0.0",
-    "react-router-dom": "^5.0.0",
-    "style-loader": "^0.23.1",
-    "webpack": "^4.30.0",
-    "webpack-cli": "^3.3.1",
-    "webpack-dev-middleware": "^3.6.2",
-    "webpack-hot-middleware": "^2.24.4"
+    "nodemon": "^1.18.11"
   },
   "scripts": {
-    "start": "npm run build && npm run production",
-    "dev": "SET NODE_ENV=development&babel-node ExpressServer_dev.js",
-    "dev:server": "SET NODE_ENV=development&nodemon --exec babel-node ExpressServer_dev.js",
-    "debug": "SET NODE_ENV=development&nodemon --exec babel-node --inspect ExpressServer_dev.js",
-    "production": "SET NODE_ENV=production&babel-node ExpressServer.js",
-    "build:server": "babel ExpressServer_dev.js --out-file ExpressServer.js",
-    "build:client": "webpack -p --config webpack.prod.config.js --progress",
-    "build": "better-npm-run build",
-    "DBUpdates": "node ./server_routes/gw2tools/scheduledDBUpdates.js"
-  },
-  "betterScripts": {
-    "build": {
-      "command": "npm run build:server && npm run build:client",
-      "env": {
-        "NODE_ENV": "production"
-      }
-    }
+    "start": "node ExpressServer_dev.js",
+    "dev": "nodemon ExpressServer_dev.js",
+    "debug": "node --inspect ExpressServer_dev.js"
   },
   "repository": {
     "type": "git",
